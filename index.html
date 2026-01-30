@@ -1,535 +1,901 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>JB VIN Decoder</title>
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0e1214">
 
-    <title>JB VIN Decoder</title>
+  <!-- ✅ Perf: preconnect to NHTSA -->
+  <link rel="preconnect" href="https://vpic.nhtsa.dot.gov">
 
-    <meta name="color-scheme" content="dark">
-    <meta name="theme-color" content="#0b1210">
+  <style>
+    :root{
+      --bg:#0e1214;
+      --card:#151b1f;
+      --row:#10161a;
 
-    <style>
-:root{
-  /* Neutral enterprise palette */
-  --bg:#0d1117;
-  --card:#161b22;
-  --row:#0f141b;
+      --text:#e6edf3;
+      --muted:#9aa7b2;
 
-  --text:#e6edf3;
-  --muted:#8b949e;
+      --accent:#3b82f6;     /* business blue */
+      --accent2:#2563eb;
 
-  --accent:#2f81f7;
-  --accent2:#1f6feb;
+      --ok:#22c55e;
+      --bad:#ef4444;
+      --warn:#f59e0b;
 
-  --ok:#2ea043;
-  --bad:#f85149;
-  --warn:#d29922;
+      --border:rgba(255,255,255,.08);
+      --shadow: 0 18px 50px rgba(0,0,0,.35);
 
-  --border:rgba(255,255,255,.12);
-}
+      --radius:18px;
+      --radius2:14px;
+    }
 
-*{box-sizing:border-box}
+    *{box-sizing:border-box}
+    html,body{height:100%}
 
-body{
-  margin:0;
-  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  -webkit-font-smoothing:antialiased;
-}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(900px 520px at 20% -10%, rgba(59,130,246,.20), transparent 60%),
+        radial-gradient(900px 520px at 90% 10%, rgba(37,99,235,.14), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      padding-bottom: calc(18px + env(safe-area-inset-bottom));
+    }
 
-/* ================= LAYOUT ================= */
+    .app{
+      max-width:580px;
+      margin:0 auto;
+      padding:16px;
+    }
 
-.app{
-  max-width:560px;
-  margin:0 auto;
-  padding:18px;
-}
+    /* ================= HEADER ================= */
+    .header{
+      text-align:center;
+      padding:14px 0 10px;
+    }
 
-/* ================= HEADER ================= */
+    .logo{
+      width:56px;height:56px;
+      margin:0 auto 10px;
+      border-radius:14px;
+      background:#0f172a;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      color:var(--accent);
+      border:1px solid var(--border);
+      box-shadow: 0 10px 28px rgba(0,0,0,.25);
+      overflow:hidden;
+    }
 
-.header{
-  text-align:center;
-  padding:16px 0 10px;
-}
+    .logo img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      border-radius:14px;
+    }
 
-.logo{
-  width:56px;
-  height:56px;
-  margin:0 auto 10px;
-  border-radius:12px;
-  background:#0b1220;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:900;
-  color:var(--accent);
-  border:1px solid var(--border);
-}
+    h1{
+      margin:4px 0 4px;
+      font-size:19px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
 
-.logo img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  border-radius:12px;
-}
+    .sub{
+      font-size:12px;
+      color:var(--muted);
+    }
 
-h1{
-  margin:4px 0 4px;
-  font-size:19px;
-  font-weight:800;
-  letter-spacing:.3px;
-}
+    /* ================= CARD ================= */
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+                 var(--card);
+      border-radius:var(--radius);
+      padding:16px;
+      margin-top:16px;
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
 
-.sub{
-  font-size:12px;
-  color:var(--muted);
-}
+    /* ================= INPUT / BUTTONS ================= */
+    .stack{display:grid; gap:10px}
 
-/* ================= CARD ================= */
+    input{
+      width:100%;
+      padding:13px 13px;
+      border-radius:var(--radius2);
+      border:1px solid var(--border);
+      background:#0b1116;
+      color:var(--text);
+      text-transform:uppercase;
+      font-size:14px;
+      letter-spacing:.6px;
+    }
 
-.card{
-  background:var(--card);
-  border-radius:16px;
-  padding:16px;
-  margin-top:16px;
-  border:1px solid var(--border);
-}
+    input:focus{
+      outline:none;
+      border-color:rgba(59,130,246,.8);
+      box-shadow: 0 0 0 4px rgba(59,130,246,.18);
+    }
 
-/* ================= INPUT / BUTTONS ================= */
+    .btns{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:10px;
+    }
 
-input{
-  width:100%;
-  padding:13px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background:#0d1117;
-  color:var(--text);
-  text-transform:uppercase;
-  font-size:14px;
-}
+    button{
+      width:100%;
+      padding:12px;
+      border-radius:var(--radius2);
+      border:1px solid var(--border);
+      font-size:13px;
+      font-weight:800;
+      cursor:pointer;
+      background:#0b1116;
+      color:var(--text);
+      transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-input:focus{
-  outline:none;
-  border-color:var(--accent);
-}
+    button:active{transform:scale(.99)}
+    button[disabled]{opacity:.6; cursor:not-allowed}
 
-button{
-  width:100%;
-  margin-top:10px;
-  padding:12px;
-  border-radius:12px;
-  font-size:14px;
-  font-weight:700;
-  cursor:pointer;
-}
+    .primary{
+      background:linear-gradient(180deg,var(--accent),var(--accent2));
+      color:#fff;
+      border:none;
+    }
 
-.primary{
-  background:linear-gradient(180deg,var(--accent),var(--accent2));
-  color:#fff;
-  border:none;
-}
+    .secondary{
+      background:#0b1116;
+      color:var(--text);
+    }
 
-.secondary{
-  background:#0d1117;
-  color:var(--text);
-  border:1px solid var(--border);
-}
+    /* ================= STATUS ================= */
+    .status{
+      margin-top:10px;
+      font-size:12px;
+      min-height:18px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:var(--muted);
+    }
 
-/* ================= STATUS ================= */
+    .dot{
+      width:8px;height:8px;border-radius:99px;
+      background:rgba(255,255,255,.18);
+      box-shadow: 0 0 0 3px rgba(255,255,255,.06);
+      flex:0 0 auto;
+    }
+    .status.ok{color:var(--ok)}
+    .status.ok .dot{background:var(--ok); box-shadow:0 0 0 3px rgba(34,197,94,.18)}
+    .status.bad{color:var(--bad)}
+    .status.bad .dot{background:var(--bad); box-shadow:0 0 0 3px rgba(239,68,68,.18)}
+    .status.warn{color:var(--warn)}
+    .status.warn .dot{background:var(--warn); box-shadow:0 0 0 3px rgba(245,158,11,.18)}
 
-.status{
-  margin-top:10px;
-  font-size:12px;
-  min-height:18px;
-}
+    .hint{
+      margin-top:6px;
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.35;
+    }
 
-.status.ok{color:var(--ok)}
-.status.bad{color:var(--bad)}
-.status.warn{color:var(--warn)}
+    /* ================= VEHICLE SUMMARY ================= */
+    .vehicle{
+      margin-top:14px;
+      padding:14px;
+      border-radius:16px;
+      background:
+        radial-gradient(650px 240px at 30% 0%, rgba(59,130,246,.20), transparent 55%),
+        #0f172a;
+      text-align:center;
+      font-weight:900;
+      font-size:16px;
+      display:none;
+      border:1px solid var(--border);
+    }
 
-/* ================= VEHICLE SUMMARY ================= */
+    .vehicle small{
+      display:block;
+      margin-top:6px;
+      font-size:12px;
+      font-weight:700;
+      color:#aeb8c2;
+    }
 
-.vehicle{
-  margin-top:16px;
-  padding:14px;
-  border-radius:14px;
-  background:#0b1220;
-  text-align:center;
-  font-weight:800;
-  font-size:16px;
-  display:none;
-  border:1px solid var(--border);
-}
+    /* ================= TABS ================= */
+    .tabs{
+      margin-top:12px;
+      display:flex;
+      gap:8px;
+      overflow:auto;
+      padding-bottom:2px;
+      scrollbar-width:none;
+    }
+    .tabs::-webkit-scrollbar{display:none}
 
-/* ================= TABS ================= */
+    .tab{
+      flex:0 0 auto;
+      padding:9px 12px;
+      border-radius:999px;
+      background:#0b1116;
+      color:var(--muted);
+      border:1px solid var(--border);
+      font-size:12px;
+      font-weight:800;
+      white-space:nowrap;
+    }
 
-.tab{
-  margin-top:10px;
-  padding:8px 12px;
-  border-radius:10px;
-  background:#0d1117;
-  color:var(--muted);
-  border:1px solid var(--border);
-  font-size:12px;
-  font-weight:600;
-}
+    .tab.active{
+      background:#0f172a;
+      color:var(--text);
+      border-color:rgba(59,130,246,.7);
+    }
 
-.tab.active{
-  background:#0b1220;
-  color:var(--text);
-  border-color:var(--accent);
-}
+    /* ================= RESULTS ================= */
+    .results,.oem{
+      margin-top:14px;
+      display:grid;
+      gap:8px;
+    }
 
-/* ================= RESULTS ================= */
+    .row{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      background:var(--row);
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+    }
 
-.results,.oem{
-  margin-top:14px;
-  display:grid;
-  gap:8px;
-}
+    .k{
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.25;
+      max-width:55%;
+    }
 
-.row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+    .v{
+      font-size:13px;
+      font-weight:900;
+      text-align:right;
+      line-height:1.2;
+      overflow-wrap:anywhere;
+      max-width:45%;
+    }
 
-  background:linear-gradient(180deg,#0f141b,#0c1117);
-  padding:10px 12px;
-  border-radius:10px;
+    .row.copyable{cursor:pointer}
+    .row.copyable:active{filter:brightness(1.08)}
+    .toast{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:calc(14px + env(safe-area-inset-bottom));
+      background:rgba(15,23,42,.92);
+      border:1px solid var(--border);
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:12px;
+      color:var(--text);
+      display:none;
+      box-shadow: var(--shadow);
+      z-index:9999;
+    }
 
-  border:1px solid rgba(255,255,255,.14);
+    /* ================= OEM ================= */
+    .oem h3{
+      font-size:13px;
+      margin:10px 0 6px;
+      color:var(--accent);
+      letter-spacing:.2px;
+    }
 
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.04),
-    0 1px 2px rgba(0,0,0,.5);
-}
+    /* ================= WORKFLOW ================= */
+    #workflow{
+      margin-top:14px;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:#0b1116;
+      display:none;
+    }
+    #workflow h3{margin:0 0 10px; color:var(--accent2); font-size:13px}
+    .bucket{display:grid; gap:8px; margin-top:10px}
+    .bucketTitle{
+      display:flex; align-items:center; gap:8px;
+      font-size:12px; font-weight:900;
+      color:var(--text);
+    }
+    .pill{
+      font-size:10px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--muted);
+    }
+    .listRow{
+      background:var(--row);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px 12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      cursor:pointer;
+    }
+    .listRow .k{max-width:65%}
+    .listRow .v{max-width:35%}
 
-.k{
-  font-size:11px;
-  color:var(--muted);
-  padding-right:10px;
-  border-right:1px solid rgba(255,255,255,.12);
-}
+    /* ================= FOOTER ================= */
+    .disclaimer{
+      margin-top:14px;
+      font-size:10px;
+      color:#7c8793;
+      line-height:1.4;
+    }
+    .footer{
+      text-align:center;
+      margin-top:18px;
+      font-size:10px;
+      color:#7c8793;
+    }
 
-.v{
-  font-size:13px;
-  font-weight:700;
-  text-align:right;
-  padding-left:10px;
-}
-
-/* ================= OEM ================= */
-
-.oem h3{
-  font-size:13px;
-  margin:10px 0 6px;
-  color:var(--accent);
-}
-
-/* ================= FOOTER ================= */
-
-.disclaimer{
-  margin-top:14px;
-  font-size:10px;
-  color:#7d8590;
-  line-height:1.4;
-}
-
-.footer{
-  text-align:center;
-  margin-top:18px;
-  font-size:10px;
-  color:#7d8590;
-}
-</style>
+    /* ================= PRINT (LOGO + RESULTS ONLY) ================= */
+    @media print{
+      body{background:#fff !important; color:#000 !important}
+      .header, .btns, .tabs, .status, .hint, .disclaimer, .footer, #workflow{display:none !important}
+      .card{box-shadow:none !important; border:0 !important; background:#fff !important}
+      .app{max-width:800px}
+      .printHeader{
+        display:flex !important;
+        align-items:center;
+        gap:12px;
+        margin-bottom:14px;
+      }
+      .printHeader .pLogo{
+        width:54px;height:54px;border-radius:10px;border:1px solid #ddd;overflow:hidden;
+        display:flex;align-items:center;justify-content:center;
+      }
+      .printHeader .pLogo img{width:100%;height:100%;object-fit:cover}
+      .printHeader .pTitle{font-size:16px;font-weight:900}
+      .printHeader .pSub{font-size:11px;color:#333}
+      .vehicle{display:block !important; background:#fff !important; border:1px solid #ddd !important}
+      .row{background:#fff !important; border:1px solid #ddd !important}
+      .k{color:#333 !important}
+      .v{color:#000 !important}
+      .tab-panel{display:grid !important}
+    }
+    .printHeader{display:none}
+  </style>
 </head>
 
 <body>
-<div class="app">
+  <div class="toast" id="toast">Copied</div>
 
+  <div class="app">
     <div class="header">
-        <div class="logo">
-            <img src="logo.png" onerror="this.remove();this.parentNode.textContent='JB';">
-        </div>
-        <h1>JB VIN Decoder</h1>
-        <div class="sub">VIN-accurate specs • Fewer wrong parts • Faster counter work</div>
+      <div class="logo">
+        <img src="logo.png" alt="JB"
+             onerror="this.remove();this.parentNode.textContent='JB';">
+      </div>
+      <h1>JB VIN Decoder</h1>
+      <div class="sub">VIN-accurate specs • Fewer wrong parts • Faster counter work</div>
     </div>
 
     <div class="card">
-    <input id="vin" maxlength="17" placeholder="ENTER 17-CHARACTER VIN">
-    <button class="primary" onclick="decode()">Decode Vehicle Instantly</button>
-    <button class="secondary" onclick="reset()">Reset</button>
-    <button class="secondary" onclick="printPage()">Print</button>
-
-    <div id="status" class="status"></div>
-    <div id="vehicle" class="vehicle"></div>
-        <button onclick="showTab('core')" class="tab active">Core</button>
-  <button onclick="showTab('engine')" class="tab">Engine</button>
-  <button onclick="showTab('drive')" class="tab">Drive</button>
-  <button onclick="showTab('body')" class="tab">Body</button>
-  <button onclick="showTab('safety')" class="tab">Safety</button>
-    <div id="core" class="results tab-panel"></div>
-<div id="engine" class="results tab-panel" style="display:none"></div>
-<div id="drive" class="results tab-panel" style="display:none"></div>
-<div id="body" class="results tab-panel" style="display:none"></div>
-<div id="safety" class="results tab-panel" style="display:none"></div>
-
-    <div id="oem" class="oem" style="display:none"></div>
-
-    <!-- ✅ ADD WORKFLOW UI RIGHT HERE -->
-    <div id="workflow" style="display:none">
-        <h3 style="margin-top:0;color:var(--accent2)">
-            Parts Counter Guide
-        </h3>
-
-        <div id="safe"></div>
-        <div id="verify"></div>
-        <div id="unsafe"></div>
-    </div>
-    <!-- ✅ END -->
-
-    <div class="disclaimer">
-        OEM compatibility is VIN-matched by configuration.
-        Exact part numbers require manufacturer or licensed catalogs.
-    </div>
-</div>
-
-<script>
-/* =======================
-   STATE
-======================= */
-let activePanel = "core";
-let busy = false;
-
-/* =======================
-   BASIC HELPERS
-======================= */
-function clean(v){
-  return v.toUpperCase().replace(/[^A-Z0-9]/g,"");
-}
-
-function valid(v){
-  return v.length === 17 && !/[IOQ]/.test(v);
-}
-
-/* =======================
-   CONFIG DETECTORS
-======================= */
-function isCVT(d){ return d.TransmissionStyle?.toLowerCase().includes("cvt"); }
-function isAutomatic(d){ return d.TransmissionStyle?.toLowerCase().includes("auto"); }
-function isManual(d){ return d.TransmissionStyle?.toLowerCase().includes("manual"); }
-function isDiesel(d){ return d.FuelTypePrimary?.toLowerCase().includes("diesel"); }
-function isElectric(d){ return d.ElectrificationLevel?.toLowerCase().includes("electric"); }
-function isAWD(d){ return d.DriveType?.toLowerCase().includes("awd"); }
-
-/* =======================
-   SCORING / LOGIC
-======================= */
-function confidenceScore(d){
-  let s = 0;
-  if(d.EngineModel) s+=20;
-  if(d.TransmissionStyle) s+=20;
-  if(d.DriveType) s+=20;
-  if(d.BodyClass) s+=20;
-  if(d.PlantCountry) s+=20;
-  return s;
-}
-
-function orderReadiness(d){
-  if(d.EngineModel && d.TransmissionStyle)
-    return "✓ Ready for most mechanical parts";
-  return "⚠ Verify configuration before ordering";
-}
-
-function platformGroup(d){
-  if(d.Make==="TOYOTA" && d.Model==="Corolla")
-    return "Toyota E170 / E180 platform";
-  if(d.Make==="HONDA" && d.Model==="Civic")
-    return "Honda Global Small platform";
-  return "Platform data unavailable";
-}
-
-function sanityCheck(d){
-  if(d.Make==="TOYOTA" && d.Model==="Corolla"){
-    if(d.EngineModel && !["2ZR-FE","1ZZ-FE"].includes(d.EngineModel)){
-      return "⚠ Uncommon engine for Corolla";
-    }
-  }
-  return "✓ VIN configuration consistent";
-}
-
-/* =======================
-   UI HELPERS (TAB-AWARE)
-======================= */
-function row(k, v){
-  if(!v || v === "Not Applicable") return;
-
-  const panel = document.getElementById(activePanel);
-  if(!panel) return;
-
-  panel.innerHTML += `
-    <div class="row">
-      <div class="k">${k}</div>
-      <div class="v">${v}</div>
-    </div>
-  `;
-}
-
-function oemSection(title, list){
-  if(!list.length) return "";
-  return `<h3>${title}</h3>` +
-    list.map(i => `
-      <div class="row">
-        <div class="k">•</div>
-        <div class="v">${i}</div>
+      <!-- print header (only shows in print) -->
+      <div class="printHeader">
+        <div class="pLogo"><img src="logo.png" alt="JB"></div>
+        <div>
+          <div class="pTitle">JB VIN Decoder</div>
+          <div class="pSub">Vehicle summary + decoded specs</div>
+        </div>
       </div>
-    `).join("");
-}
 
-/* =======================
-   TAB SWITCHING
-======================= */
-function showTab(id){
-  activePanel = id;
+      <div class="stack">
+        <input id="vin" maxlength="17" placeholder="ENTER 17-CHARACTER VIN" inputmode="latin-prose" autocomplete="off" />
 
-  document.querySelectorAll(".tab-panel").forEach(p => {
-    p.style.display = "none";
-  });
+        <div class="btns">
+          <button class="primary" id="decodeBtn" onclick="decode()">Decode</button>
+          <button class="secondary" onclick="resetAll()">Reset</button>
+          <button class="secondary" onclick="printReport()">Print</button>
+        </div>
+      </div>
 
-  const panel = document.getElementById(id);
-  if(panel) panel.style.display = "grid";
+      <div id="status" class="status"><span class="dot"></span><span id="statusText"></span></div>
+      <div class="hint" id="hint">Tip: paste a VIN, it auto-cleans. Use the tabs to view results.</div>
 
-  document.querySelectorAll(".tab").forEach(b => {
-    b.classList.remove("active");
-  });
+      <div id="vehicle" class="vehicle"></div>
 
-  const btn = document.querySelector(
-    `.tab[onclick="showTab('${id}')"]`
-  );
-  if(btn) btn.classList.add("active");
-}
+      <div class="tabs" role="tablist" aria-label="VIN Decoder Tabs">
+        <button onclick="showTab('core')" class="tab active" role="tab" aria-selected="true">Core</button>
+        <button onclick="showTab('engine')" class="tab" role="tab" aria-selected="false">Engine</button>
+        <button onclick="showTab('drive')" class="tab" role="tab" aria-selected="false">Drive</button>
+        <button onclick="showTab('body')" class="tab" role="tab" aria-selected="false">Body</button>
+        <button onclick="showTab('safety')" class="tab" role="tab" aria-selected="false">Safety</button>
+      </div>
 
-/* =======================
-   MAIN DECODE
-======================= */
-async function decode(){
-  let v = clean(vin.value);
-  vin.value = v;
+      <div id="core" class="results tab-panel"></div>
+      <div id="engine" class="results tab-panel" style="display:none"></div>
+      <div id="drive" class="results tab-panel" style="display:none"></div>
+      <div id="body" class="results tab-panel" style="display:none"></div>
+      <div id="safety" class="results tab-panel" style="display:none"></div>
 
-  if(!valid(v)){
-    status.textContent = "Invalid VIN";
-    status.className = "status bad";
-    return;
-  }
-  if(busy) return;
-  busy = true;
+      <div id="oem" class="oem" style="display:none"></div>
 
-  status.textContent = "Decoding VIN…";
-  status.className = "status warn";
+      <!-- ✅ Parts Counter Guide -->
+      <div id="workflow">
+        <h3>Parts Counter Guide</h3>
+        <div class="bucket">
+          <div class="bucketTitle">✅ Safe to order <span class="pill">VIN-decided</span></div>
+          <div id="safe"></div>
+        </div>
+        <div class="bucket">
+          <div class="bucketTitle">⚠ Verify first <span class="pill">needs confirmation</span></div>
+          <div id="verify"></div>
+        </div>
+        <div class="bucket">
+          <div class="bucketTitle">⛔ High risk <span class="pill">too many variants</span></div>
+          <div id="unsafe"></div>
+        </div>
+      </div>
 
-  document.querySelectorAll(".tab-panel").forEach(p => p.innerHTML = "");
-  oem.innerHTML = "";
-  oem.style.display = "none";
-  vehicle.style.display = "none";
+      <div class="disclaimer">
+        OEM compatibility is VIN-matched by configuration. Exact part numbers require manufacturer or licensed catalogs.
+      </div>
+    </div>
 
-  try{
-    const api =
-      "https://api.allorigins.win/raw?url=" +
-      encodeURIComponent(
-        `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${v}?format=json`
-      );
+    <div class="footer">JB VIN Decoder • Built for speed + accuracy</div>
+  </div>
 
-    const r = await fetch(api);
-    const json = await r.json();
-    const d = json.Results[0];
+  <script>
+    /* =======================
+       DOM
+    ======================= */
+    const vinEl = document.getElementById("vin");
+    const vehicleEl = document.getElementById("vehicle");
+    const statusWrap = document.getElementById("status");
+    const statusText = document.getElementById("statusText");
+    const decodeBtn = document.getElementById("decodeBtn");
+    const toast = document.getElementById("toast");
 
-    vehicle.innerHTML = `
-      ${d.ModelYear} ${d.Make} ${d.Model}<br>
-      <span style="font-size:12px;color:#aaa">
-        ${d.EngineModel || "Unknown"} •
-        ${d.TransmissionStyle || "Unknown"} •
-        ${d.DriveType || "Unknown"}
-      </span>`;
-    vehicle.style.display = "block";
+    const panels = ["core","engine","drive","body","safety"];
+    let activePanel = "core";
+    let busy = false;
 
-    /* CORE */
-    activePanel = "core";
-    row("VIN", v);
-    row("Model Year", d.ModelYear);
-    row("Make", d.Make);
-    row("Model", d.Model);
-    row("Trim", d.Trim);
-    row("Decode Confidence", `${confidenceScore(d)}%`);
-    row("VIN Validation", sanityCheck(d));
-    row("Order Readiness", orderReadiness(d));
-    row("Platform", platformGroup(d));
+    // cache last decode so print always works and tabs can be rebuilt fast
+    let last = { vin:"", d:null, ts:0 };
 
-    /* ENGINE */
-    activePanel = "engine";
-    row("Engine Code", d.EngineModel);
-    row("Displacement", d.DisplacementL && `${d.DisplacementL} L`);
-    row("Cylinders", d.EngineCylinders);
-    row("Fuel Type", d.FuelTypePrimary);
+    /* =======================
+       BASIC HELPERS
+    ======================= */
+    function clean(v){ return (v||"").toUpperCase().replace(/[^A-Z0-9]/g,""); }
+    function valid(v){ return v.length === 17 && !/[IOQ]/.test(v); }
 
-    /* DRIVE */
-    activePanel = "drive";
-    row("Transmission", d.TransmissionStyle);
-    row("Drive Type", d.DriveType);
+    function setStatus(msg, type=""){
+      statusText.textContent = msg || "";
+      statusWrap.className = "status" + (type ? " " + type : "");
+    }
 
-    /* BODY */
-    activePanel = "body";
-    row("Body Class", d.BodyClass);
-    row("Doors", d.Doors);
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.style.display = "block";
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=> toast.style.display="none", 1000);
+    }
 
-    /* SAFETY */
-    activePanel = "safety";
-    row("ABS", d.ABS);
-    row("ESC", d.ESC);
+    /* =======================
+       CONFIG DETECTORS
+    ======================= */
+    function has(s){ return !!(s && s !== "Not Applicable"); }
+    function lower(x){ return (x||"").toString().toLowerCase(); }
 
-    /* OEM */
-    const drivetrain = [];
-    if(isCVT(d)) drivetrain.push("CVT transmission","Valve body","TCM");
-    else if(isAutomatic(d)) drivetrain.push("Automatic transmission","Torque converter");
-    else if(isManual(d)) drivetrain.push("Manual transmission","Clutch");
-    if(isAWD(d)) drivetrain.push("Transfer case");
+    function isCVT(d){ return lower(d.TransmissionStyle).includes("cvt"); }
+    function isAutomatic(d){ return lower(d.TransmissionStyle).includes("auto"); }
+    function isManual(d){ return lower(d.TransmissionStyle).includes("manual"); }
+    function isDiesel(d){ return lower(d.FuelTypePrimary).includes("diesel"); }
+    function isElectric(d){
+      return lower(d.ElectrificationLevel).includes("electric") ||
+             lower(d.FuelTypePrimary).includes("electric");
+    }
+    function isAWD(d){
+      const t = lower(d.DriveType);
+      return t.includes("awd") || t.includes("all wheel");
+    }
 
-    oem.innerHTML = oemSection("Drivetrain (VIN-Aware)", drivetrain);
-    oem.style.display = "block";
+    /* =======================
+       SCORING / LOGIC
+    ======================= */
+    function confidenceScore(d){
+      let s = 0;
+      if(has(d.Make)) s+=10;
+      if(has(d.Model)) s+=10;
+      if(has(d.ModelYear)) s+=10;
+      if(has(d.EngineModel) || has(d.DisplacementL) || has(d.EngineCylinders)) s+=20;
+      if(has(d.TransmissionStyle) || has(d.TransmissionSpeeds)) s+=20;
+      if(has(d.DriveType)) s+=15;
+      if(has(d.BodyClass) || has(d.Doors)) s+=15;
+      return Math.min(100, s);
+    }
 
-    showTab("core");
-    status.textContent = "VIN decoded successfully";
-    status.className = "status ok";
+    function orderReadiness(d){
+      if((has(d.EngineModel) || has(d.DisplacementL)) && has(d.TransmissionStyle) && has(d.DriveType))
+        return "✓ Ready for most mechanical parts";
+      if((has(d.Make) && has(d.Model) && has(d.ModelYear)))
+        return "⚠ Good base — verify engine/trans before ordering";
+      return "⛔ Decode incomplete — verify configuration";
+    }
 
-  }catch{
-    status.textContent = "Decode failed";
-    status.className = "status bad";
-  }
+    function platformGroup(d){
+      // keep your examples, but more tolerant
+      const mk = (d.Make||"").toUpperCase();
+      const md = (d.Model||"").toUpperCase();
+      if(mk==="TOYOTA" && md==="COROLLA") return "Toyota Corolla platform family";
+      if(mk==="HONDA" && md==="CIVIC") return "Honda Global Small platform";
+      return "Platform data unavailable";
+    }
 
-  busy = false;
-}
+    function sanityCheck(d){
+      // keep simple + safe
+      if(!has(d.Make) || !has(d.Model) || !has(d.ModelYear)) return "⚠ Missing key identifiers";
+      return "✓ VIN configuration consistent";
+    }
 
-/* =======================
-   BUTTONS
-======================= */
-function reset(){
-  vin.value = "";
-  status.textContent = "";
-  status.className = "status";
-  document.querySelectorAll(".tab-panel").forEach(p => p.innerHTML = "");
-  oem.innerHTML = "";
-  oem.style.display = "none";
-  vehicle.style.display = "none";
-  showTab("core");
-  busy = false;
-}
+    /* =======================
+       UI HELPERS (TAB-AWARE)
+    ======================= */
+    function getPanel(id){ return document.getElementById(id); }
 
-function printPage(){
-  window.print();
-}
-</script>
+    function clearPanels(){
+      document.querySelectorAll(".tab-panel").forEach(p => p.innerHTML = "");
+    }
 
+    function addRow(panelId, k, v){
+      if(!has(v)) return;
+      const panel = getPanel(panelId);
+      if(!panel) return;
+
+      const safeK = escapeHtml(k);
+      const safeV = escapeHtml(String(v));
+
+      // copy-on-tap: row becomes copyable
+      panel.insertAdjacentHTML("beforeend", `
+        <div class="row copyable" data-copy="${safeV}">
+          <div class="k">${safeK}</div>
+          <div class="v">${safeV}</div>
+        </div>
+      `);
+    }
+
+    function escapeHtml(str){
+      return str.replace(/[&<>"']/g, (m)=>({
+        "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+      }[m]));
+    }
+
+    function buildVehicleSummary(d, v){
+      const line1 = `${d.ModelYear || ""} ${d.Make || ""} ${d.Model || ""}`.trim() || "Vehicle";
+      const e = d.EngineModel || (d.DisplacementL ? `${d.DisplacementL} L` : "Unknown engine");
+      const t = d.TransmissionStyle || "Unknown trans";
+      const dr = d.DriveType || "Unknown drive";
+      vehicleEl.innerHTML = `${escapeHtml(line1)}<small>${escapeHtml(e)} • ${escapeHtml(t)} • ${escapeHtml(dr)}</small>`;
+      vehicleEl.style.display = "block";
+    }
+
+    function oemSection(title, list){
+      if(!list.length) return "";
+      const safeTitle = escapeHtml(title);
+      return `<h3>${safeTitle}</h3>` + list.map(i=>{
+        const s = escapeHtml(i);
+        return `
+          <div class="row copyable" data-copy="${s}">
+            <div class="k">•</div>
+            <div class="v">${s}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function showWorkflow(d){
+      const wf = document.getElementById("workflow");
+      const safeEl = document.getElementById("safe");
+      const verifyEl = document.getElementById("verify");
+      const unsafeEl = document.getElementById("unsafe");
+
+      // reset
+      safeEl.innerHTML = "";
+      verifyEl.innerHTML = "";
+      unsafeEl.innerHTML = "";
+
+      // simple logic: safe if VIN-decided and low variant
+      const safe = [];
+      const verify = [];
+      const unsafe = [];
+
+      // drivetrain bucket
+      if(isElectric(d)){
+        safe.push("Cabin air filter", "Wiper blades");
+        verify.push("HV battery components (catalog required)");
+        unsafe.push("Inverter/drive unit (VIN option-heavy)");
+      }else{
+        safe.push("Cabin air filter", "Wiper blades");
+        if(has(d.EngineModel) || has(d.DisplacementL)) safe.push("Oil filter (engine-known)");
+        else verify.push("Oil filter (confirm engine)");
+
+        if(isManual(d)) verify.push("Clutch kit (confirm trans code)");
+        if(isCVT(d)) unsafe.push("CVT valve body / TCM (variant-heavy)");
+      }
+
+      if(isAWD(d)) verify.push("Transfer case fluid / service parts");
+      if(isDiesel(d)) verify.push("Fuel filter (diesel-specific)");
+
+      // render
+      const renderList = (el, items) => {
+        if(!items.length){
+          el.innerHTML = `<div class="row"><div class="k">—</div><div class="v">None</div></div>`;
+          return;
+        }
+        el.innerHTML = items.map(i => `
+          <div class="listRow copyable" data-copy="${escapeHtml(i)}">
+            <div class="k">${escapeHtml(i)}</div>
+            <div class="v">Copy</div>
+          </div>
+        `).join("");
+      };
+
+      renderList(safeEl, safe);
+      renderList(verifyEl, verify);
+      renderList(unsafeEl, unsafe);
+
+      wf.style.display = "block";
+    }
+
+    /* =======================
+       TAB SWITCHING
+    ======================= */
+    function showTab(id){
+      activePanel = id;
+
+      document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+      const panel = getPanel(id);
+      if(panel) panel.style.display = "grid";
+
+      document.querySelectorAll(".tab").forEach(b => {
+        b.classList.remove("active");
+        b.setAttribute("aria-selected","false");
+      });
+
+      const btn = document.querySelector(`.tab[onclick="showTab('${id}')"]`);
+      if(btn){
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected","true");
+      }
+    }
+
+    /* =======================
+       FETCH (with fallback)
+       - tries direct NHTSA first
+       - fallback to allorigins if CORS blocks
+    ======================= */
+    async function fetchDecode(v){
+      const direct = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${v}?format=json`;
+      try{
+        const r1 = await fetch(direct, { cache:"no-store" });
+        if(!r1.ok) throw new Error("Direct not ok");
+        return await r1.json();
+      }catch(e){
+        const proxy = "https://api.allorigins.win/raw?url=" + encodeURIComponent(direct);
+        const r2 = await fetch(proxy, { cache:"no-store" });
+        return await r2.json();
+      }
+    }
+
+    /* =======================
+       MAIN DECODE
+    ======================= */
+    async function decode(){
+      let v = clean(vinEl.value);
+      vinEl.value = v;
+
+      if(!valid(v)){
+        setStatus("Invalid VIN (17 chars, no I/O/Q).", "bad");
+        vehicleEl.style.display = "none";
+        return;
+      }
+
+      // instant return if same VIN decoded recently
+      const now = Date.now();
+      if(last.vin === v && last.d && (now - last.ts) < 60_000){
+        renderAll(last.d, v);
+        setStatus("Loaded from cache (last 60s).", "ok");
+        return;
+      }
+
+      if(busy) return;
+      busy = true;
+      decodeBtn.disabled = true;
+
+      setStatus("Decoding VIN…", "warn");
+      clearPanels();
+      document.getElementById("oem").innerHTML = "";
+      document.getElementById("oem").style.display = "none";
+      document.getElementById("workflow").style.display = "none";
+      vehicleEl.style.display = "none";
+
+      try{
+        const json = await fetchDecode(v);
+        const d = json?.Results?.[0] || {};
+
+        // save cache
+        last = { vin:v, d, ts:Date.now() };
+
+        renderAll(d, v);
+        setStatus("VIN decoded successfully.", "ok");
+
+      }catch(err){
+        setStatus("Decode failed. Check connection and try again.", "bad");
+      }
+
+      busy = false;
+      decodeBtn.disabled = false;
+    }
+
+    function renderAll(d, v){
+      clearPanels();
+      buildVehicleSummary(d, v);
+
+      // CORE
+      addRow("core", "VIN", v);
+      addRow("core", "Model Year", d.ModelYear);
+      addRow("core", "Make", d.Make);
+      addRow("core", "Model", d.Model);
+      addRow("core", "Trim", d.Trim);
+      addRow("core", "Series", d.Series);
+      addRow("core", "Vehicle Type", d.VehicleType);
+      addRow("core", "Body Class", d.BodyClass);
+      addRow("core", "Plant Country", d.PlantCountry);
+      addRow("core", "Plant City", d.PlantCity);
+      addRow("core", "Decode Confidence", `${confidenceScore(d)}%`);
+      addRow("core", "VIN Validation", sanityCheck(d));
+      addRow("core", "Order Readiness", orderReadiness(d));
+      addRow("core", "Platform", platformGroup(d));
+
+      // ENGINE
+      addRow("engine", "Engine Code", d.EngineModel);
+      addRow("engine", "Displacement", d.DisplacementL ? `${d.DisplacementL} L` : "");
+      addRow("engine", "Cylinders", d.EngineCylinders);
+      addRow("engine", "Fuel Type", d.FuelTypePrimary);
+      addRow("engine", "Electrification", d.ElectrificationLevel);
+      addRow("engine", "Valve Train", d.ValveTrainDesign);
+      addRow("engine", "Turbo", d.Turbo);
+      addRow("engine", "Engine Config", d.EngineConfiguration);
+
+      // DRIVE
+      addRow("drive", "Transmission", d.TransmissionStyle);
+      addRow("drive", "Transmission Speeds", d.TransmissionSpeeds);
+      addRow("drive", "Drive Type", d.DriveType);
+      addRow("drive", "Brake System", d.BrakeSystemType);
+
+      // BODY
+      addRow("body", "Doors", d.Doors);
+      addRow("body", "Body Class", d.BodyClass);
+      addRow("body", "GVWR", d.GVWR);
+      addRow("body", "Wheelbase", d.WheelBaseShort);
+      addRow("body", "Track Width", d.TrackWidth);
+
+      // SAFETY
+      addRow("safety", "ABS", d.ABS);
+      addRow("safety", "ESC", d.ESC);
+      addRow("safety", "Traction Control", d.TractionControl);
+      addRow("safety", "Air Bags (Front)", d.AirBagLocFront);
+      addRow("safety", "Air Bags (Side)", d.AirBagLocSide);
+
+      // OEM suggestions
+      const drivetrain = [];
+      if(isCVT(d)) drivetrain.push("CVT transmission", "Valve body", "TCM");
+      else if(isAutomatic(d)) drivetrain.push("Automatic transmission", "Torque converter");
+      else if(isManual(d)) drivetrain.push("Manual transmission", "Clutch kit");
+      if(isAWD(d)) drivetrain.push("Transfer case", "Rear differential service parts");
+      if(isDiesel(d)) drivetrain.push("Fuel filter (diesel)", "Glow plugs (if equipped)");
+      if(isElectric(d)) drivetrain.push("Cabin filter", "12V system check");
+
+      const oem = document.getElementById("oem");
+      oem.innerHTML = oemSection("Drivetrain (VIN-Aware)", drivetrain);
+      oem.style.display = drivetrain.length ? "block" : "none";
+
+      // Parts counter workflow guide
+      showWorkflow(d);
+
+      // ensure core tab visible
+      showTab("core");
+    }
+
+    /* =======================
+       COPY-ON-TAP (rows)
+    ======================= */
+    document.addEventListener("click", async (e)=>{
+      const row = e.target.closest(".copyable");
+      if(!row) return;
+      const text = row.getAttribute("data-copy");
+      if(!text) return;
+
+      try{
+        await navigator.clipboard.writeText(text);
+        showToast("Copied");
+      }catch{
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+        showToast("Copied");
+      }
+    });
+
+    /* =======================
+       INPUT UX
+       - auto-clean as you type/paste
+       - Enter key decodes
+    ======================= */
+    vinEl.addEventListener("input", ()=>{
+      const cleaned = clean(vinEl.value);
+      if(vinEl.value !== cleaned) vinEl.value = cleaned;
+      if(cleaned.length && !valid(cleaned)) setStatus("Enter a valid 17-char VIN (no I/O/Q).", "warn");
+      if(cleaned.length === 17 && valid(cleaned)) setStatus("Ready to decode.", "");
+    });
+
+    vinEl.addEventListener("keydown", (e)=>{
+      if(e.key === "Enter"){
+        e.preventDefault();
+        decode();
+      }
+    });
+
+    /* =======================
+       BUTTONS
+    ======================= */
+    function resetAll(){
+      vinEl.value = "";
+      vehicleEl.style.display = "none";
+      clearPanels();
+      document.getElementById("oem").innerHTML = "";
+      document.getElementById("oem").style.display = "none";
+      document.getElementById("workflow").style.display = "none";
+      setStatus("", "");
+      showTab("core");
+      busy = false;
+      decodeBtn.disabled = false;
+      last = { vin:"", d:null, ts:0 };
+    }
+
+    // Print only: logo + vehicle summary + decoded rows
+    function printReport(){
+      if(!last.d){
+        setStatus("Decode a VIN first, then print.", "warn");
+        return;
+      }
+      window.print();
+    }
+
+    // default status idle
+    setStatus("", "");
+  </script>
 </body>
 </html>
