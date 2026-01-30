@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>JB VIN Decoder</title>
+
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#0b1210">
+
+    <style>
+        :root{
+          --bg:#0b1210;
+          --card:#121c18;
+          --row:#0f1714;
+          --text:#e9fff4;
+          --muted:#9bb0a6;
+          --accent:#ff3d00;
+          --accent2:#ff6a00;
+          --ok:#2fd37b;
+          --bad:#ff5d5d;
+          --warn:#ffcc66;
+        }
+
+        *{box-sizing:border-box}
+
+        body{
+          margin:0;
+          font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+          background:var(--bg);
+          color:var(--text);
+        }
+
+        .app{
+          max-width:520px;
+          margin:0 auto;
+          padding:14px;
+        }
+
+        .header{text-align:center;padding:12px 0 6px}
+
+        .logo{
+          width:56px;height:56px;margin:0 auto 8px;
+          border-radius:14px;background:#1a1a1a;
+          display:flex;align-items:center;justify-content:center;
+          font-weight:900;color:var(--accent)
+        }
+
+        .logo img{width:100%;height:100%;object-fit:cover;border-radius:14px}
+
+        h1{margin:4px 0 2px;font-size:18px;font-weight:900}
+        .sub{font-size:11px;color:var(--muted)}
+
+        .card{
+          background:var(--card);
+          border-radius:18px;
+          padding:14px;
+          margin-top:14px;
+        }
+
+        input{
+          width:100%;padding:12px;border-radius:14px;
+          border:1px solid rgba(255,255,255,.15);
+          background:#0c1612;color:var(--text);
+          text-transform:uppercase;font-size:14px;
+        }
+
+        button{
+          width:100%;margin-top:10px;padding:12px;
+          border-radius:14px;border:0;font-size:14px;
+          font-weight:900;cursor:pointer;
+        }
+
+        .primary{background:linear-gradient(180deg,var(--accent),var(--accent2));color:#000}
+        .secondary{background:#1a1a1a;color:var(--text);border:1px solid rgba(255,255,255,.15)}
+
+        .status{margin-top:10px;font-size:12px;min-height:18px}
+        .status.ok{color:var(--ok)}
+        .status.bad{color:var(--bad)}
+        .status.warn{color:var(--warn)}
+
+        .vehicle{
+          margin-top:14px;padding:12px;border-radius:16px;
+          background:linear-gradient(135deg,#141414,#1b1b1b);
+          text-align:center;font-weight:900;font-size:17px;display:none;
+        }
+
+        .results,.oem{margin-top:12px;display:grid;gap:8px}
+
+        .row{
+          display:flex;justify-content:space-between;
+          background:var(--row);padding:10px 12px;
+          border-radius:12px;border:1px solid rgba(255,255,255,.06);
+        }
+
+        .k{font-size:11px;color:var(--muted)}
+        .v{font-size:13px;font-weight:800;text-align:right}
+
+        .oem h3{
+          font-size:13px;
+          margin:6px 0;
+          color:var(--accent2);
+        }
+
+        .disclaimer{
+          margin-top:12px;font-size:10px;color:#888;line-height:1.4;
+        }
+
+        .footer{text-align:center;margin-top:16px;font-size:10px;color:#777}
+    </style>
+</head>
+
+<body>
+<div class="app">
+
+    <div class="header">
+        <div class="logo">
+            <img src="logo.png" onerror="this.remove();this.parentNode.textContent='JB';">
+        </div>
+        <h1>JB VIN Decoder</h1>
+        <div class="sub">Powered by NHTSA vPIC</div>
+    </div>
+
+    <div class="card">
+    <input id="vin" maxlength="17" placeholder="ENTER 17-CHARACTER VIN">
+    <button class="primary" onclick="decode()">Decode VIN</button>
+    <button class="secondary" onclick="reset()">Reset</button>
+    <button class="secondary" onclick="printPage()">Print</button>
+
+    <div id="status" class="status"></div>
+    <div id="vehicle" class="vehicle"></div>
+    <div id="results" class="results"></div>
+
+    <div id="oem" class="oem" style="display:none"></div>
+
+    <div class="disclaimer">
+        OEM compatibility is VIN-matched by configuration.
+        Exact part numbers require manufacturer or licensed catalogs.
+    </div>
+</div>
+
+<script>
+const vinInput = vin;
+const statusEl = status;
+const resultsEl = results;
+const vehicleEl = vehicle;
+const oemEl = oem;
+
+let busy = false;
+
+function clean(v){
+  return v.toUpperCase().replace(/[^A-Z0-9]/g,"");
+}
+function valid(v){
+  return v.length === 17 && !/[IOQ]/.test(v);
+}
+
+function row(k,v){
+  if(!v || v==="Not Applicable") return;
+  resultsEl.innerHTML +=
+    `<div class="row"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+}
+
+async function decode(){
+  let v = clean(vinInput.value);
+  vinInput.value = v;
+
+  if(!valid(v)){
+    statusEl.textContent="Invalid VIN";
+    statusEl.className="status bad";
+    return;
+  }
+  if(busy) return;
+  busy = true;
+
+  statusEl.textContent="Decoding VIN…";
+  statusEl.className="status warn";
+  resultsEl.innerHTML="";
+  vehicleEl.style.display="none";
+
+  try{
+    const r = await fetch(
+      `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${v}?format=json`
+    );
+    const d = (await r.json()).Results[0];
+
+    vehicleEl.innerHTML = `${d.ModelYear} ${d.Make} ${d.Model}`;
+    vehicleEl.style.display="block";
+
+    row("VIN", v);
+    row("Make", d.Make);
+    row("Model", d.Model);
+    row("Year", d.ModelYear);
+    row("Engine", d.EngineModel);
+    row("Transmission", d.TransmissionStyle);
+    row("Drive Type", d.DriveType);
+
+    statusEl.textContent="VIN decoded successfully";
+    statusEl.className="status ok";
+
+  }catch(e){
+    statusEl.textContent="Decode failed";
+    statusEl.className="status bad";
+  }
+
+  busy=false;
+}
+</script>
+
+</body>
+</html>
