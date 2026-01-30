@@ -96,10 +96,20 @@
         .status.warn{color:var(--warn)}
 
         .vehicle{
-          margin-top:14px;padding:12px;border-radius:16px;
-          background:linear-gradient(135deg,#141414,#1b1b1b);
-          text-align:center;font-weight:900;font-size:17px;display:none;
-        }
+  margin-top:14px;
+  padding:12px;
+  border-radius:16px;
+  background:linear-gradient(135deg,#141414,#1b1b1b);
+  text-align:center;
+  font-weight:900;
+  font-size:17px;
+  display:none;
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.06),
+    0 12px 30px rgba(255,61,0,.15);
+   transition: box-shadow .25s ease, transform .25s ease;          
+}
 
         .results,.oem{margin-top:12px;display:grid;gap:8px}
 
@@ -134,12 +144,12 @@
             <img src="logo.png" onerror="this.remove();this.parentNode.textContent='JB';">
         </div>
         <h1>JB VIN Decoder</h1>
-        <div class="sub">Powered by NHTSA vPIC</div>
+        <div class="sub">VIN-accurate specs • Fewer wrong parts • Faster counter work</div>
     </div>
 
     <div class="card">
     <input id="vin" maxlength="17" placeholder="ENTER 17-CHARACTER VIN">
-    <button class="primary" onclick="decode()">Decode VIN</button>
+    <button class="primary" onclick="decode()">Decode Vehicle Instantly</button>
     <button class="secondary" onclick="reset()">Reset</button>
     <button class="secondary" onclick="printPage()">Print</button>
 
