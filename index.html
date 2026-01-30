@@ -23,6 +23,20 @@
           --bad:#ff5d5d;
           --warn:#ffcc66;
         }
+        .tab{
+  margin-top:8px;
+  padding:8px;
+  border-radius:10px;
+  background:#1a1a1a;
+  color:var(--muted);
+  border:1px solid rgba(255,255,255,.1);
+  font-size:12px;
+}
+        .tab.active{
+  background:linear-gradient(180deg,var(--accent),var(--accent2));
+  color:#000;
+}
+
 
         *{box-sizing:border-box}
 
@@ -131,7 +145,16 @@
 
     <div id="status" class="status"></div>
     <div id="vehicle" class="vehicle"></div>
-    <div id="results" class="results"></div>
+        <button onclick="showTab('core')" class="tab active">Core</button>
+  <button onclick="showTab('engine')" class="tab">Engine</button>
+  <button onclick="showTab('drive')" class="tab">Drive</button>
+  <button onclick="showTab('body')" class="tab">Body</button>
+  <button onclick="showTab('safety')" class="tab">Safety</button>
+    <div id="core" class="results tab-panel"></div>
+<div id="engine" class="results tab-panel" style="display:none"></div>
+<div id="drive" class="results tab-panel" style="display:none"></div>
+<div id="body" class="results tab-panel" style="display:none"></div>
+<div id="safety" class="results tab-panel" style="display:none"></div>
 
     <div id="oem" class="oem" style="display:none"></div>
 
@@ -154,24 +177,26 @@
 </div>
 
 <script>
-/* ===== DOM REFERENCES ===== */
-const vinInput = vin;
-const statusEl = status;
-const resultsEl = results;
-const vehicleEl = vehicle;
-const oemEl = oem;
-
+/* =======================
+   STATE
+======================= */
+let activePanel = "core";
 let busy = false;
 
-/* ===== BASIC HELPERS ===== */
+/* =======================
+   BASIC HELPERS
+======================= */
 function clean(v){
   return v.toUpperCase().replace(/[^A-Z0-9]/g,"");
 }
+
 function valid(v){
   return v.length === 17 && !/[IOQ]/.test(v);
 }
 
-/* ===== CONFIGURATION DETECTORS ===== */
+/* =======================
+   CONFIG DETECTORS
+======================= */
 function isCVT(d){ return d.TransmissionStyle?.toLowerCase().includes("cvt"); }
 function isAutomatic(d){ return d.TransmissionStyle?.toLowerCase().includes("auto"); }
 function isManual(d){ return d.TransmissionStyle?.toLowerCase().includes("manual"); }
@@ -179,7 +204,9 @@ function isDiesel(d){ return d.FuelTypePrimary?.toLowerCase().includes("diesel")
 function isElectric(d){ return d.ElectrificationLevel?.toLowerCase().includes("electric"); }
 function isAWD(d){ return d.DriveType?.toLowerCase().includes("awd"); }
 
-/* ===== PROFESSIONAL SCORING ===== */
+/* =======================
+   SCORING / LOGIC
+======================= */
 function confidenceScore(d){
   let s = 0;
   if(d.EngineModel) s+=20;
@@ -191,13 +218,16 @@ function confidenceScore(d){
 }
 
 function orderReadiness(d){
-  if(d.EngineModel && d.TransmissionStyle) return "✓ Ready for most mechanical parts";
+  if(d.EngineModel && d.TransmissionStyle)
+    return "✓ Ready for most mechanical parts";
   return "⚠ Verify configuration before ordering";
 }
 
 function platformGroup(d){
-  if(d.Make==="TOYOTA" && d.Model==="Corolla") return "Toyota E170 / E180 platform";
-  if(d.Make==="HONDA" && d.Model==="Civic") return "Honda Global Small platform";
+  if(d.Make==="TOYOTA" && d.Model==="Corolla")
+    return "Toyota E170 / E180 platform";
+  if(d.Make==="HONDA" && d.Model==="Civic")
+    return "Honda Global Small platform";
   return "Platform data unavailable";
 }
 
@@ -210,41 +240,79 @@ function sanityCheck(d){
   return "✓ VIN configuration consistent";
 }
 
-/* ===== UI HELPERS ===== */
-function row(k,v){
-  if(!v || v==="Not Applicable") return;
-  resultsEl.innerHTML +=
-    `<div class="row"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+/* =======================
+   UI HELPERS (TAB-AWARE)
+======================= */
+function row(k, v){
+  if(!v || v === "Not Applicable") return;
+
+  const panel = document.getElementById(activePanel);
+  if(!panel) return;
+
+  panel.innerHTML += `
+    <div class="row">
+      <div class="k">${k}</div>
+      <div class="v">${v}</div>
+    </div>
+  `;
 }
 
-function oemSection(title,list){
+function oemSection(title, list){
   if(!list.length) return "";
   return `<h3>${title}</h3>` +
-    list.map(i =>
-      `<div class="row"><div class="k">•</div><div class="v">${i}</div></div>`
-    ).join("");
+    list.map(i => `
+      <div class="row">
+        <div class="k">•</div>
+        <div class="v">${i}</div>
+      </div>
+    `).join("");
 }
 
-/* ===== MAIN DECODE ===== */
+/* =======================
+   TAB SWITCHING
+======================= */
+function showTab(id){
+  activePanel = id;
+
+  document.querySelectorAll(".tab-panel").forEach(p => {
+    p.style.display = "none";
+  });
+
+  const panel = document.getElementById(id);
+  if(panel) panel.style.display = "grid";
+
+  document.querySelectorAll(".tab").forEach(b => {
+    b.classList.remove("active");
+  });
+
+  const btn = document.querySelector(
+    `.tab[onclick="showTab('${id}')"]`
+  );
+  if(btn) btn.classList.add("active");
+}
+
+/* =======================
+   MAIN DECODE
+======================= */
 async function decode(){
-  let v = clean(vinInput.value);
-  vinInput.value = v;
+  let v = clean(vin.value);
+  vin.value = v;
 
   if(!valid(v)){
-    statusEl.textContent = "Invalid VIN";
-    statusEl.className = "status bad";
+    status.textContent = "Invalid VIN";
+    status.className = "status bad";
     return;
   }
   if(busy) return;
   busy = true;
 
-  statusEl.textContent = "Decoding VIN…";
-  statusEl.className = "status warn";
+  status.textContent = "Decoding VIN…";
+  status.className = "status warn";
 
-  resultsEl.innerHTML = "";
-  oemEl.innerHTML = "";
-  oemEl.style.display = "none";
-  vehicleEl.style.display = "none";
+  document.querySelectorAll(".tab-panel").forEach(p => p.innerHTML = "");
+  oem.innerHTML = "";
+  oem.style.display = "none";
+  vehicle.style.display = "none";
 
   try{
     const api =
@@ -257,103 +325,83 @@ async function decode(){
     const json = await r.json();
     const d = json.Results[0];
 
-    /* HEADER */
-    vehicleEl.innerHTML =
-      `${d.ModelYear} ${d.Make} ${d.Model}<br>
-       <span style="font-size:12px;font-weight:600;color:#aaa">
-       ${d.EngineModel || "Unknown"} • ${d.TransmissionStyle || "Unknown"} • ${d.DriveType || "Unknown"}
-       </span>`;
-    vehicleEl.style.display = "block";
+    vehicle.innerHTML = `
+      ${d.ModelYear} ${d.Make} ${d.Model}<br>
+      <span style="font-size:12px;color:#aaa">
+        ${d.EngineModel || "Unknown"} •
+        ${d.TransmissionStyle || "Unknown"} •
+        ${d.DriveType || "Unknown"}
+      </span>`;
+    vehicle.style.display = "block";
 
-    /* ================== CORE IDENTIFICATION ================== */
+    /* CORE */
+    activePanel = "core";
     row("VIN", v);
     row("Model Year", d.ModelYear);
     row("Make", d.Make);
     row("Model", d.Model);
     row("Trim", d.Trim);
-    row("Series", d.Series);
-
-    /* ================== CONFIDENCE / LOGIC ================== */
     row("Decode Confidence", `${confidenceScore(d)}%`);
     row("VIN Validation", sanityCheck(d));
     row("Order Readiness", orderReadiness(d));
     row("Platform", platformGroup(d));
 
-    /* ================== ENGINE ================== */
-    row("Engine Displacement", d.DisplacementL ? `${d.DisplacementL} L` : "");
+    /* ENGINE */
+    activePanel = "engine";
     row("Engine Code", d.EngineModel);
-    row("Engine Configuration", d.EngineConfiguration);
+    row("Displacement", d.DisplacementL && `${d.DisplacementL} L`);
     row("Cylinders", d.EngineCylinders);
-    row("Valves per Cylinder", d.ValvesPerCylinder);
-    row("Engine Horsepower", d.EngineHP);
     row("Fuel Type", d.FuelTypePrimary);
-    row("Fuel Secondary", d.FuelTypeSecondary);
-    row("Fuel Delivery", d.FuelDeliveryType);
-    row("Turbo / Supercharged", d.EnginePowerType);
-    row("Cooling Type", d.CoolingType);
 
-    /* ================== TRANSMISSION ================== */
-    row("Transmission Style", d.TransmissionStyle);
-    row("Transmission Speeds", d.TransmissionSpeeds);
-
-    /* ================== DRIVETRAIN ================== */
+    /* DRIVE */
+    activePanel = "drive";
+    row("Transmission", d.TransmissionStyle);
     row("Drive Type", d.DriveType);
-    row("Axles", d.Axles);
-    row("Differential Type", d.DifferentialType);
 
-    /* ================== BODY / CHASSIS ================== */
+    /* BODY */
+    activePanel = "body";
     row("Body Class", d.BodyClass);
     row("Doors", d.Doors);
-    row("Vehicle Type", d.VehicleType);
-    row("GVWR", d.GVWR);
-    row("Wheelbase (Short)", d.WheelBaseShort);
-    row("Wheelbase (Long)", d.WheelBaseLong);
 
-    /* ================== SAFETY ================== */
+    /* SAFETY */
+    activePanel = "safety";
     row("ABS", d.ABS);
     row("ESC", d.ESC);
-    row("Traction Control", d.TractionControl);
-    row("Airbag Locations", d.AirBagLocFront);
 
-    /* ================== ELECTRIFICATION ================== */
-    row("Electrification Level", d.ElectrificationLevel);
-    row("Battery Type", d.BatteryType);
-    row("Battery Voltage", d.BatteryVoltage);
-
-    /* ================== MANUFACTURING ================== */
-    row("Plant City", d.PlantCity);
-    row("Plant State", d.PlantState);
-    row("Plant Country", d.PlantCountry);
-
-    /* VIN-AWARE PARTS */
+    /* OEM */
     const drivetrain = [];
-    if(isCVT(d)) drivetrain.push("CVT transmission","Valve body","Belt / chain","TCM");
-    else if(isAutomatic(d)) drivetrain.push("Automatic transmission","Torque converter","Solenoids");
-    else if(isManual(d)) drivetrain.push("Manual transmission","Clutch","Flywheel");
+    if(isCVT(d)) drivetrain.push("CVT transmission","Valve body","TCM");
+    else if(isAutomatic(d)) drivetrain.push("Automatic transmission","Torque converter");
+    else if(isManual(d)) drivetrain.push("Manual transmission","Clutch");
     if(isAWD(d)) drivetrain.push("Transfer case");
 
-    oemEl.innerHTML = oemSection("Drivetrain (VIN-Aware)", drivetrain);
-    oemEl.style.display = "block";
+    oem.innerHTML = oemSection("Drivetrain (VIN-Aware)", drivetrain);
+    oem.style.display = "block";
 
-    statusEl.textContent = "VIN decoded successfully";
-    statusEl.className = "status ok";
+    showTab("core");
+    status.textContent = "VIN decoded successfully";
+    status.className = "status ok";
 
-  }catch(e){
-    statusEl.textContent = "Decode failed";
-    statusEl.className = "status bad";
+  }catch{
+    status.textContent = "Decode failed";
+    status.className = "status bad";
   }
 
   busy = false;
 }
-    /* ===== MISSING BUTTON FUNCTIONS ===== */
+
+/* =======================
+   BUTTONS
+======================= */
 function reset(){
-  vinInput.value = "";
-  statusEl.textContent = "";
-  statusEl.className = "status";
-  resultsEl.innerHTML = "";
-  oemEl.innerHTML = "";
-  oemEl.style.display = "none";
-  vehicleEl.style.display = "none";
+  vin.value = "";
+  status.textContent = "";
+  status.className = "status";
+  document.querySelectorAll(".tab-panel").forEach(p => p.innerHTML = "");
+  oem.innerHTML = "";
+  oem.style.display = "none";
+  vehicle.style.display = "none";
+  showTab("core");
   busy = false;
 }
 
