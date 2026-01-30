@@ -231,25 +231,31 @@ async function decode(){
   vinInput.value = v;
 
   if(!valid(v)){
-    statusEl.textContent="Invalid VIN";
-    statusEl.className="status bad";
+    statusEl.textContent = "Invalid VIN";
+    statusEl.className = "status bad";
     return;
   }
   if(busy) return;
   busy = true;
 
-  statusEl.textContent="Decoding VIN…";
-  statusEl.className="status warn";
-  resultsEl.innerHTML="";
-  oemEl.innerHTML="";
-  oemEl.style.display="none";
-  vehicleEl.style.display="none";
+  statusEl.textContent = "Decoding VIN…";
+  statusEl.className = "status warn";
+
+  resultsEl.innerHTML = "";
+  oemEl.innerHTML = "";
+  oemEl.style.display = "none";
+  vehicleEl.style.display = "none";
 
   try{
-    const r = await fetch(
-      `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${v}?format=json`
-    );
-    const d = (await r.json()).Results[0];
+    const api =
+      "https://api.allorigins.win/raw?url=" +
+      encodeURIComponent(
+        `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${v}?format=json`
+      );
+
+    const r = await fetch(api);
+    const json = await r.json();
+    const d = json.Results[0];
 
     /* HEADER */
     vehicleEl.innerHTML =
@@ -257,97 +263,67 @@ async function decode(){
        <span style="font-size:12px;font-weight:600;color:#aaa">
        ${d.EngineModel || "Unknown"} • ${d.TransmissionStyle || "Unknown"} • ${d.DriveType || "Unknown"}
        </span>`;
-    vehicleEl.style.display="block";
+    vehicleEl.style.display = "block";
 
-    /* CORE DATA */
     /* ================== CORE IDENTIFICATION ================== */
-row("VIN", v);
-row("Model Year", d.ModelYear);
-row("Make", d.Make);
-row("Model", d.Model);
-row("Trim", d.Trim);
-row("Series", d.Series);
+    row("VIN", v);
+    row("Model Year", d.ModelYear);
+    row("Make", d.Make);
+    row("Model", d.Model);
+    row("Trim", d.Trim);
+    row("Series", d.Series);
 
-/* ================== CONFIDENCE / LOGIC ================== */
-row("Decode Confidence", `${confidenceScore(d)}%`);
-row("VIN Validation", sanityCheck(d));
-row("Order Readiness", orderReadiness(d));
-row("Platform", platformGroup(d));
+    /* ================== CONFIDENCE / LOGIC ================== */
+    row("Decode Confidence", `${confidenceScore(d)}%`);
+    row("VIN Validation", sanityCheck(d));
+    row("Order Readiness", orderReadiness(d));
+    row("Platform", platformGroup(d));
 
-/* ================== ENGINE ================== */
-row("Engine Displacement", d.DisplacementL ? `${d.DisplacementL} L` : "");
-row("Engine Code", d.EngineModel);
-row("Engine Configuration", d.EngineConfiguration);
-row("Cylinders", d.EngineCylinders);
-row("Valves per Cylinder", d.ValvesPerCylinder);
-row("Engine Horsepower", d.EngineHP);
-row("Fuel Type", d.FuelTypePrimary);
-row("Fuel Secondary", d.FuelTypeSecondary);
-row("Fuel Delivery", d.FuelDeliveryType);
-row("Turbo / Supercharged", d.EnginePowerType);
-row("Cooling Type", d.CoolingType);
+    /* ================== ENGINE ================== */
+    row("Engine Displacement", d.DisplacementL ? `${d.DisplacementL} L` : "");
+    row("Engine Code", d.EngineModel);
+    row("Engine Configuration", d.EngineConfiguration);
+    row("Cylinders", d.EngineCylinders);
+    row("Valves per Cylinder", d.ValvesPerCylinder);
+    row("Engine Horsepower", d.EngineHP);
+    row("Fuel Type", d.FuelTypePrimary);
+    row("Fuel Secondary", d.FuelTypeSecondary);
+    row("Fuel Delivery", d.FuelDeliveryType);
+    row("Turbo / Supercharged", d.EnginePowerType);
+    row("Cooling Type", d.CoolingType);
 
-/* ================== TRANSMISSION ================== */
-row("Transmission Style", d.TransmissionStyle);
-row("Transmission Speeds", d.TransmissionSpeeds);
+    /* ================== TRANSMISSION ================== */
+    row("Transmission Style", d.TransmissionStyle);
+    row("Transmission Speeds", d.TransmissionSpeeds);
 
-/* ================== DRIVETRAIN ================== */
-row("Drive Type", d.DriveType);
-row("Axles", d.Axles);
-row("Differential Type", d.DifferentialType);
+    /* ================== DRIVETRAIN ================== */
+    row("Drive Type", d.DriveType);
+    row("Axles", d.Axles);
+    row("Differential Type", d.DifferentialType);
 
-/* ================== BODY / CHASSIS ================== */
-row("Body Class", d.BodyClass);
-row("Doors", d.Doors);
-row("Vehicle Type", d.VehicleType);
-row("GVWR", d.GVWR);
-row("Wheelbase (Short)", d.WheelBaseShort);
-row("Wheelbase (Long)", d.WheelBaseLong);
+    /* ================== BODY / CHASSIS ================== */
+    row("Body Class", d.BodyClass);
+    row("Doors", d.Doors);
+    row("Vehicle Type", d.VehicleType);
+    row("GVWR", d.GVWR);
+    row("Wheelbase (Short)", d.WheelBaseShort);
+    row("Wheelbase (Long)", d.WheelBaseLong);
 
-/* ================== DIMENSIONS ================== */
-row("Track Width Front", d.TrackWidthFront);
-row("Track Width Rear", d.TrackWidthRear);
+    /* ================== SAFETY ================== */
+    row("ABS", d.ABS);
+    row("ESC", d.ESC);
+    row("Traction Control", d.TractionControl);
+    row("Airbag Locations", d.AirBagLocFront);
 
-/* ================== BRAKES / SUSPENSION ================== */
-row("Brake System Type", d.BrakeSystemType);
-row("Brake System Description", d.BrakeSystemDesc);
-row("Steering Location", d.SteeringLocation);
-row("Suspension Type Front", d.SuspensionTypeFront);
-row("Suspension Type Rear", d.SuspensionTypeRear);
+    /* ================== ELECTRIFICATION ================== */
+    row("Electrification Level", d.ElectrificationLevel);
+    row("Battery Type", d.BatteryType);
+    row("Battery Voltage", d.BatteryVoltage);
 
-/* ================== SAFETY ================== */
-row("ABS", d.ABS);
-row("ESC", d.ESC);
-row("Traction Control", d.TractionControl);
-row("Airbag Locations", d.AirBagLocFront);
-
-/* ================== ELECTRIFICATION ================== */
-row("Electrification Level", d.ElectrificationLevel);
-row("Battery Type", d.BatteryType);
-row("Battery Voltage", d.BatteryVoltage);
-row("Battery Cells", d.BatteryCells);
-row("Battery Modules", d.BatteryModules);
-
-/* ================== MANUFACTURING ================== */
-row("Plant Company", d.PlantCompanyName);
-row("Plant City", d.PlantCity);
-row("Plant State", d.PlantState);
-row("Plant Country", d.PlantCountry);
-
-/* ================== OEM / MARKET ================== */
-row("Manufacturer", d.Manufacturer);
-row("Market", d.Market);
-row("Make ID", d.MakeID);
-row("Model ID", d.ModelID);
-row("Series ID", d.SeriesID);
-
-/* ================== ADDITIONAL OEM DATA ================== */
-row("Bed Length", d.BedLengthIN);
-row("Cab Type", d.CabType);
-row("Bus Length", d.BusLength);
-row("Trailer Type", d.TrailerType);
-row("Trailer Body Type", d.TrailerBodyType);
-      
+    /* ================== MANUFACTURING ================== */
+    row("Plant City", d.PlantCity);
+    row("Plant State", d.PlantState);
+    row("Plant Country", d.PlantCountry);
 
     /* VIN-AWARE PARTS */
     const drivetrain = [];
@@ -357,17 +333,17 @@ row("Trailer Body Type", d.TrailerBodyType);
     if(isAWD(d)) drivetrain.push("Transfer case");
 
     oemEl.innerHTML = oemSection("Drivetrain (VIN-Aware)", drivetrain);
-    oemEl.style.display="block";
+    oemEl.style.display = "block";
 
-    statusEl.textContent="VIN decoded successfully";
-    statusEl.className="status ok";
+    statusEl.textContent = "VIN decoded successfully";
+    statusEl.className = "status ok";
 
   }catch(e){
-    statusEl.textContent="Decode failed";
-    statusEl.className="status bad";
+    statusEl.textContent = "Decode failed";
+    statusEl.className = "status bad";
   }
 
-  busy=false;
+  busy = false;
 }
 </script>
 
