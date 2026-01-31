@@ -8,7 +8,7 @@
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0e1214">
 
-  <!-- ✅ Perf: preconnect to NHTSA -->
+  <!-- Perf: preconnect -->
   <link rel="preconnect" href="https://vpic.nhtsa.dot.gov">
 
   <style>
@@ -20,7 +20,7 @@
       --text:#e6edf3;
       --muted:#9aa7b2;
 
-      --accent:#3b82f6;     /* business blue */
+      --accent:#3b82f6;
       --accent2:#2563eb;
 
       --ok:#22c55e;
@@ -50,7 +50,7 @@
     }
 
     .app{
-      max-width:580px;
+      max-width:620px;
       margin:0 auto;
       padding:16px;
     }
@@ -81,18 +81,20 @@
       height:100%;
       object-fit:cover;
       border-radius:14px;
+      display:block;
     }
 
     h1{
       margin:4px 0 4px;
       font-size:19px;
-      font-weight:800;
+      font-weight:900;
       letter-spacing:.2px;
     }
 
     .sub{
       font-size:12px;
       color:var(--muted);
+      line-height:1.35;
     }
 
     /* ================= CARD ================= */
@@ -139,7 +141,7 @@
       border-radius:var(--radius2);
       border:1px solid var(--border);
       font-size:13px;
-      font-weight:800;
+      font-weight:900;
       cursor:pointer;
       background:#0b1116;
       color:var(--text);
@@ -162,6 +164,38 @@
       color:var(--text);
     }
 
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .toggle{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border:1px solid var(--border);
+      background:#0b1116;
+      border-radius:999px;
+      padding:8px 10px;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:900;
+    }
+    .toggle input{width:auto; margin:0}
+    .miniBtns{
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .miniBtn{
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+    }
+
     /* ================= STATUS ================= */
     .status{
       margin-top:10px;
@@ -171,6 +205,7 @@
       align-items:center;
       gap:8px;
       color:var(--muted);
+      line-height:1.35;
     }
 
     .dot{
@@ -202,7 +237,7 @@
         radial-gradient(650px 240px at 30% 0%, rgba(59,130,246,.20), transparent 55%),
         #0f172a;
       text-align:center;
-      font-weight:900;
+      font-weight:950;
       font-size:16px;
       display:none;
       border:1px solid var(--border);
@@ -212,7 +247,7 @@
       display:block;
       margin-top:6px;
       font-size:12px;
-      font-weight:700;
+      font-weight:800;
       color:#aeb8c2;
     }
 
@@ -235,7 +270,7 @@
       color:var(--muted);
       border:1px solid var(--border);
       font-size:12px;
-      font-weight:800;
+      font-weight:950;
       white-space:nowrap;
     }
 
@@ -272,7 +307,7 @@
 
     .v{
       font-size:13px;
-      font-weight:900;
+      font-weight:950;
       text-align:right;
       line-height:1.2;
       overflow-wrap:anywhere;
@@ -281,6 +316,7 @@
 
     .row.copyable{cursor:pointer}
     .row.copyable:active{filter:brightness(1.08)}
+
     .toast{
       position:fixed;
       left:50%;
@@ -318,7 +354,7 @@
     .bucket{display:grid; gap:8px; margin-top:10px}
     .bucketTitle{
       display:flex; align-items:center; gap:8px;
-      font-size:12px; font-weight:900;
+      font-size:12px; font-weight:950;
       color:var(--text);
     }
     .pill{
@@ -341,6 +377,43 @@
     .listRow .k{max-width:65%}
     .listRow .v{max-width:35%}
 
+    /* ================= HISTORY ================= */
+    .history{
+      margin-top:12px;
+      display:none;
+      border-top:1px dashed rgba(255,255,255,.10);
+      padding-top:12px;
+    }
+    .historyHead{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .historyHead b{font-size:12px;font-weight:950}
+    .chips{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .chip{
+      border:1px solid var(--border);
+      background:#0b1116;
+      color:var(--text);
+      font-weight:950;
+      font-size:11px;
+      padding:8px 10px;
+      border-radius:999px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .chip span{color:var(--muted); font-weight:900}
+    .chip:active{transform:scale(.99)}
+
     /* ================= FOOTER ================= */
     .disclaimer{
       margin-top:14px;
@@ -358,9 +431,9 @@
     /* ================= PRINT (LOGO + RESULTS ONLY) ================= */
     @media print{
       body{background:#fff !important; color:#000 !important}
-      .header, .btns, .tabs, .status, .hint, .disclaimer, .footer, #workflow{display:none !important}
+      .header, .btns, .tabs, .status, .hint, .disclaimer, .footer, #workflow, .toolbar, .history{display:none !important}
       .card{box-shadow:none !important; border:0 !important; background:#fff !important}
-      .app{max-width:800px}
+      .app{max-width:900px}
       .printHeader{
         display:flex !important;
         align-items:center;
@@ -372,7 +445,7 @@
         display:flex;align-items:center;justify-content:center;
       }
       .printHeader .pLogo img{width:100%;height:100%;object-fit:cover}
-      .printHeader .pTitle{font-size:16px;font-weight:900}
+      .printHeader .pTitle{font-size:16px;font-weight:950}
       .printHeader .pSub{font-size:11px;color:#333}
       .vehicle{display:block !important; background:#fff !important; border:1px solid #ddd !important}
       .row{background:#fff !important; border:1px solid #ddd !important}
@@ -381,6 +454,10 @@
       .tab-panel{display:grid !important}
     }
     .printHeader{display:none}
+
+    @media (prefers-reduced-motion: reduce){
+      *{transition:none !important}
+    }
   </style>
 </head>
 
@@ -389,9 +466,9 @@
 
   <div class="app">
     <div class="header">
-      <div class="logo">
+      <div class="logo" aria-label="JB logo">
         <img src="logo.png" alt="JB"
-             onerror="this.remove();this.parentNode.textContent='JB';">
+             onerror="this.remove(); this.parentNode.textContent='JB';">
       </div>
       <h1>JB VIN Decoder</h1>
       <div class="sub">VIN-accurate specs • Fewer wrong parts • Faster counter work</div>
@@ -408,26 +485,42 @@
       </div>
 
       <div class="stack">
-        <input id="vin" maxlength="17" placeholder="ENTER 17-CHARACTER VIN" inputmode="latin-prose" autocomplete="off" />
+        <input id="vin" maxlength="17" placeholder="ENTER 17-CHARACTER VIN"
+               inputmode="text" autocomplete="off" aria-label="VIN input" />
 
         <div class="btns">
           <button class="primary" id="decodeBtn" onclick="decode()">Decode</button>
           <button class="secondary" onclick="resetAll()">Reset</button>
           <button class="secondary" onclick="printReport()">Print</button>
         </div>
+
+        <div class="toolbar">
+          <label class="toggle" title="Auto-decode when VIN reaches 17 chars">
+            <input id="autoDecode" type="checkbox">
+            Auto-decode
+          </label>
+
+          <div class="miniBtns">
+            <button class="miniBtn secondary" type="button" onclick="fillSample()">Sample VINs</button>
+            <button class="miniBtn secondary" type="button" onclick="toggleAdvanced()">Advanced</button>
+          </div>
+        </div>
       </div>
 
       <div id="status" class="status"><span class="dot"></span><span id="statusText"></span></div>
-      <div class="hint" id="hint">Tip: paste a VIN, it auto-cleans. Use the tabs to view results.</div>
+      <div class="hint" id="hint">
+        Tip: paste a VIN, it auto-cleans. Tap any row to copy. Print is logo + vehicle + decoded rows.
+      </div>
 
       <div id="vehicle" class="vehicle"></div>
 
       <div class="tabs" role="tablist" aria-label="VIN Decoder Tabs">
-        <button onclick="showTab('core')" class="tab active" role="tab" aria-selected="true">Core</button>
-        <button onclick="showTab('engine')" class="tab" role="tab" aria-selected="false">Engine</button>
-        <button onclick="showTab('drive')" class="tab" role="tab" aria-selected="false">Drive</button>
-        <button onclick="showTab('body')" class="tab" role="tab" aria-selected="false">Body</button>
-        <button onclick="showTab('safety')" class="tab" role="tab" aria-selected="false">Safety</button>
+        <button class="tab active" data-tab="core" role="tab" aria-selected="true">Core</button>
+        <button class="tab" data-tab="engine" role="tab" aria-selected="false">Engine</button>
+        <button class="tab" data-tab="drive" role="tab" aria-selected="false">Drive</button>
+        <button class="tab" data-tab="body" role="tab" aria-selected="false">Body</button>
+        <button class="tab" data-tab="safety" role="tab" aria-selected="false">Safety</button>
+        <button class="tab" id="advTabBtn" data-tab="advanced" role="tab" aria-selected="false" style="display:none">Advanced</button>
       </div>
 
       <div id="core" class="results tab-panel"></div>
@@ -435,10 +528,11 @@
       <div id="drive" class="results tab-panel" style="display:none"></div>
       <div id="body" class="results tab-panel" style="display:none"></div>
       <div id="safety" class="results tab-panel" style="display:none"></div>
+      <div id="advanced" class="results tab-panel" style="display:none"></div>
 
       <div id="oem" class="oem" style="display:none"></div>
 
-      <!-- ✅ Parts Counter Guide -->
+      <!-- Parts Counter Guide -->
       <div id="workflow">
         <h3>Parts Counter Guide</h3>
         <div class="bucket">
@@ -453,6 +547,15 @@
           <div class="bucketTitle">⛔ High risk <span class="pill">too many variants</span></div>
           <div id="unsafe"></div>
         </div>
+      </div>
+
+      <!-- History -->
+      <div class="history" id="history">
+        <div class="historyHead">
+          <b>Recent VINs</b>
+          <button class="miniBtn secondary" type="button" onclick="clearHistory()">Clear</button>
+        </div>
+        <div class="chips" id="chips"></div>
       </div>
 
       <div class="disclaimer">
@@ -474,18 +577,27 @@
     const decodeBtn = document.getElementById("decodeBtn");
     const toast = document.getElementById("toast");
 
-    const panels = ["core","engine","drive","body","safety"];
+    const panels = ["core","engine","drive","body","safety","advanced"];
     let activePanel = "core";
     let busy = false;
 
-    // cache last decode so print always works and tabs can be rebuilt fast
-    let last = { vin:"", d:null, ts:0 };
+    // cache last decode so print works
+    let last = { vin:"", d:null, ts:0, source:"" };
+
+    // history
+    const HISTORY_KEY = "jb_vin_history_v2";
+    let history = loadHistory();
+
+    // advanced fields toggle
+    let advancedOn = false;
 
     /* =======================
        BASIC HELPERS
     ======================= */
     function clean(v){ return (v||"").toUpperCase().replace(/[^A-Z0-9]/g,""); }
     function valid(v){ return v.length === 17 && !/[IOQ]/.test(v); }
+    function lower(x){ return (x||"").toString().toLowerCase(); }
+    function has(v){ return !!(v && v !== "Not Applicable"); }
 
     function setStatus(msg, type=""){
       statusText.textContent = msg || "";
@@ -496,15 +608,18 @@
       toast.textContent = msg;
       toast.style.display = "block";
       clearTimeout(showToast._t);
-      showToast._t = setTimeout(()=> toast.style.display="none", 1000);
+      showToast._t = setTimeout(()=> toast.style.display="none", 950);
+    }
+
+    function escapeHtml(str){
+      return String(str ?? "").replace(/[&<>"']/g, (m)=>({
+        "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+      }[m]));
     }
 
     /* =======================
        CONFIG DETECTORS
     ======================= */
-    function has(s){ return !!(s && s !== "Not Applicable"); }
-    function lower(x){ return (x||"").toString().toLowerCase(); }
-
     function isCVT(d){ return lower(d.TransmissionStyle).includes("cvt"); }
     function isAutomatic(d){ return lower(d.TransmissionStyle).includes("auto"); }
     function isManual(d){ return lower(d.TransmissionStyle).includes("manual"); }
@@ -542,7 +657,6 @@
     }
 
     function platformGroup(d){
-      // keep your examples, but more tolerant
       const mk = (d.Make||"").toUpperCase();
       const md = (d.Model||"").toUpperCase();
       if(mk==="TOYOTA" && md==="COROLLA") return "Toyota Corolla platform family";
@@ -551,13 +665,12 @@
     }
 
     function sanityCheck(d){
-      // keep simple + safe
       if(!has(d.Make) || !has(d.Model) || !has(d.ModelYear)) return "⚠ Missing key identifiers";
       return "✓ VIN configuration consistent";
     }
 
     /* =======================
-       UI HELPERS (TAB-AWARE)
+       UI HELPERS
     ======================= */
     function getPanel(id){ return document.getElementById(id); }
 
@@ -573,19 +686,12 @@
       const safeK = escapeHtml(k);
       const safeV = escapeHtml(String(v));
 
-      // copy-on-tap: row becomes copyable
       panel.insertAdjacentHTML("beforeend", `
         <div class="row copyable" data-copy="${safeV}">
           <div class="k">${safeK}</div>
           <div class="v">${safeV}</div>
         </div>
       `);
-    }
-
-    function escapeHtml(str){
-      return str.replace(/[&<>"']/g, (m)=>({
-        "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
-      }[m]));
     }
 
     function buildVehicleSummary(d, v){
@@ -617,34 +723,29 @@
       const verifyEl = document.getElementById("verify");
       const unsafeEl = document.getElementById("unsafe");
 
-      // reset
       safeEl.innerHTML = "";
       verifyEl.innerHTML = "";
       unsafeEl.innerHTML = "";
 
-      // simple logic: safe if VIN-decided and low variant
       const safe = [];
       const verify = [];
       const unsafe = [];
 
-      // drivetrain bucket
+      safe.push("Cabin air filter", "Wiper blades");
+
       if(isElectric(d)){
-        safe.push("Cabin air filter", "Wiper blades");
-        verify.push("HV battery components (catalog required)");
-        unsafe.push("Inverter/drive unit (VIN option-heavy)");
+        verify.push("High-voltage components (catalog required)");
+        unsafe.push("Inverter/drive unit (option-heavy)");
       }else{
-        safe.push("Cabin air filter", "Wiper blades");
         if(has(d.EngineModel) || has(d.DisplacementL)) safe.push("Oil filter (engine-known)");
         else verify.push("Oil filter (confirm engine)");
-
         if(isManual(d)) verify.push("Clutch kit (confirm trans code)");
         if(isCVT(d)) unsafe.push("CVT valve body / TCM (variant-heavy)");
       }
 
-      if(isAWD(d)) verify.push("Transfer case fluid / service parts");
+      if(isAWD(d)) verify.push("Transfer case service parts");
       if(isDiesel(d)) verify.push("Fuel filter (diesel-specific)");
 
-      // render
       const renderList = (el, items) => {
         if(!items.length){
           el.innerHTML = `<div class="row"><div class="k">—</div><div class="v">None</div></div>`;
@@ -666,11 +767,17 @@
     }
 
     /* =======================
-       TAB SWITCHING
+       TABS (better than onclick strings)
     ======================= */
+    document.querySelectorAll(".tab").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const id = btn.getAttribute("data-tab");
+        showTab(id);
+      });
+    });
+
     function showTab(id){
       activePanel = id;
-
       document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
       const panel = getPanel(id);
       if(panel) panel.style.display = "grid";
@@ -680,7 +787,7 @@
         b.setAttribute("aria-selected","false");
       });
 
-      const btn = document.querySelector(`.tab[onclick="showTab('${id}')"]`);
+      const btn = document.querySelector(`.tab[data-tab="${id}"]`);
       if(btn){
         btn.classList.add("active");
         btn.setAttribute("aria-selected","true");
@@ -688,20 +795,22 @@
     }
 
     /* =======================
-       FETCH (with fallback)
-       - tries direct NHTSA first
-       - fallback to allorigins if CORS blocks
+       FETCH (direct + proxy fallback) with source
     ======================= */
     async function fetchDecode(v){
-      const direct = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${v}?format=json`;
+      const url = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${v}?format=json`;
+
+      // 1) direct
       try{
-        const r1 = await fetch(direct, { cache:"no-store" });
-        if(!r1.ok) throw new Error("Direct not ok");
-        return await r1.json();
-      }catch(e){
-        const proxy = "https://api.allorigins.win/raw?url=" + encodeURIComponent(direct);
+        const r1 = await fetch(url, { cache:"no-store" });
+        if(!r1.ok) throw new Error("Direct response not OK");
+        return { json: await r1.json(), source:"direct" };
+      }catch(_){
+        // 2) proxy
+        const proxy = "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
         const r2 = await fetch(proxy, { cache:"no-store" });
-        return await r2.json();
+        if(!r2.ok) throw new Error("Proxy response not OK");
+        return { json: await r2.json(), source:"proxy" };
       }
     }
 
@@ -718,11 +827,10 @@
         return;
       }
 
-      // instant return if same VIN decoded recently
       const now = Date.now();
       if(last.vin === v && last.d && (now - last.ts) < 60_000){
         renderAll(last.d, v);
-        setStatus("Loaded from cache (last 60s).", "ok");
+        setStatus(`Loaded from cache (last 60s). Source: ${last.source}.`, "ok");
         return;
       }
 
@@ -738,17 +846,19 @@
       vehicleEl.style.display = "none";
 
       try{
-        const json = await fetchDecode(v);
+        const { json, source } = await fetchDecode(v);
         const d = json?.Results?.[0] || {};
 
-        // save cache
-        last = { vin:v, d, ts:Date.now() };
+        last = { vin:v, d, ts:Date.now(), source };
+
+        // history
+        pushHistory(v, d);
+        renderHistory();
 
         renderAll(d, v);
-        setStatus("VIN decoded successfully.", "ok");
-
+        setStatus(`VIN decoded successfully. Source: ${source}.`, "ok");
       }catch(err){
-        setStatus("Decode failed. Check connection and try again.", "bad");
+        setStatus("Decode failed. Check connection (or CORS). Try again.", "bad");
       }
 
       busy = false;
@@ -770,6 +880,7 @@
       addRow("core", "Body Class", d.BodyClass);
       addRow("core", "Plant Country", d.PlantCountry);
       addRow("core", "Plant City", d.PlantCity);
+      addRow("core", "Manufacturer", d.Manufacturer);
       addRow("core", "Decode Confidence", `${confidenceScore(d)}%`);
       addRow("core", "VIN Validation", sanityCheck(d));
       addRow("core", "Order Readiness", orderReadiness(d));
@@ -805,6 +916,21 @@
       addRow("safety", "Air Bags (Front)", d.AirBagLocFront);
       addRow("safety", "Air Bags (Side)", d.AirBagLocSide);
 
+      // ADVANCED (optional)
+      if(advancedOn){
+        const adv = getPanel("advanced");
+        adv.innerHTML = "";
+        // dump useful high-signal fields without spamming "Not Applicable"
+        const keys = Object.keys(d || {}).sort((a,b)=>a.localeCompare(b));
+        keys.forEach(k=>{
+          const val = d[k];
+          if(!has(val)) return;
+          // avoid duplicating core basics
+          if(["Make","Model","ModelYear","Trim","Series","VehicleType","BodyClass","EngineModel","DisplacementL","EngineCylinders","FuelTypePrimary","TransmissionStyle","DriveType"].includes(k)) return;
+          addRow("advanced", k, val);
+        });
+      }
+
       // OEM suggestions
       const drivetrain = [];
       if(isCVT(d)) drivetrain.push("CVT transmission", "Valve body", "TCM");
@@ -818,15 +944,12 @@
       oem.innerHTML = oemSection("Drivetrain (VIN-Aware)", drivetrain);
       oem.style.display = drivetrain.length ? "block" : "none";
 
-      // Parts counter workflow guide
       showWorkflow(d);
-
-      // ensure core tab visible
       showTab("core");
     }
 
     /* =======================
-       COPY-ON-TAP (rows)
+       COPY-ON-TAP
     ======================= */
     document.addEventListener("click", async (e)=>{
       const row = e.target.closest(".copyable");
@@ -838,7 +961,6 @@
         await navigator.clipboard.writeText(text);
         showToast("Copied");
       }catch{
-        // fallback
         const ta = document.createElement("textarea");
         ta.value = text;
         document.body.appendChild(ta);
@@ -850,15 +972,21 @@
     });
 
     /* =======================
-       INPUT UX
-       - auto-clean as you type/paste
-       - Enter key decodes
+       INPUT UX (clean + optional auto decode)
     ======================= */
+    let autoTimer = null;
+
     vinEl.addEventListener("input", ()=>{
       const cleaned = clean(vinEl.value);
       if(vinEl.value !== cleaned) vinEl.value = cleaned;
+
       if(cleaned.length && !valid(cleaned)) setStatus("Enter a valid 17-char VIN (no I/O/Q).", "warn");
       if(cleaned.length === 17 && valid(cleaned)) setStatus("Ready to decode.", "");
+
+      if(document.getElementById("autoDecode").checked && cleaned.length === 17 && valid(cleaned)){
+        clearTimeout(autoTimer);
+        autoTimer = setTimeout(()=> decode(), 250);
+      }
     });
 
     vinEl.addEventListener("keydown", (e)=>{
@@ -882,10 +1010,9 @@
       showTab("core");
       busy = false;
       decodeBtn.disabled = false;
-      last = { vin:"", d:null, ts:0 };
+      last = { vin:"", d:null, ts:0, source:"" };
     }
 
-    // Print only: logo + vehicle summary + decoded rows
     function printReport(){
       if(!last.d){
         setStatus("Decode a VIN first, then print.", "warn");
@@ -894,7 +1021,96 @@
       window.print();
     }
 
-    // default status idle
+    /* =======================
+       SAMPLE VINs (for testing UI)
+    ======================= */
+    const samples = [
+      "1HGCM82633A004352", // Honda (sample)
+      "1FTFW1ET1EFA00001", // Ford (sample)
+      "2T1BURHE5JC000001", // Toyota (sample)
+      "1N4AL3AP9JC000001"  // Nissan (sample)
+    ];
+    let sampleIdx = 0;
+    function fillSample(){
+      vinEl.value = samples[sampleIdx % samples.length];
+      sampleIdx++;
+      vinEl.dispatchEvent(new Event("input"));
+      setStatus("Sample VIN loaded. Tap Decode.", "");
+    }
+
+    /* =======================
+       ADVANCED toggle
+    ======================= */
+    function toggleAdvanced(){
+      advancedOn = !advancedOn;
+      const btn = document.getElementById("advTabBtn");
+      btn.style.display = advancedOn ? "inline-flex" : "none";
+      showToast(advancedOn ? "Advanced ON" : "Advanced OFF");
+      // re-render if we have data
+      if(last.d) renderAll(last.d, last.vin);
+      if(!advancedOn && activePanel === "advanced") showTab("core");
+    }
+
+    /* =======================
+       HISTORY
+    ======================= */
+    function loadHistory(){
+      try{
+        const raw = localStorage.getItem(HISTORY_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+      }catch{
+        return [];
+      }
+    }
+    function saveHistory(){
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
+    function pushHistory(vin, d){
+      const title = `${d.ModelYear||""} ${d.Make||""} ${d.Model||""}`.trim();
+      history = history.filter(x => x.vin !== vin);
+      history.unshift({ vin, title: title || "Vehicle", t: Date.now() });
+      history = history.slice(0, 8);
+      saveHistory();
+    }
+    function renderHistory(){
+      const wrap = document.getElementById("history");
+      const chips = document.getElementById("chips");
+      chips.innerHTML = "";
+
+      if(!history.length){
+        wrap.style.display = "none";
+        return;
+      }
+
+      wrap.style.display = "block";
+      history.forEach(h=>{
+        chips.insertAdjacentHTML("beforeend", `
+          <div class="chip" data-v="${escapeHtml(h.vin)}">
+            ${escapeHtml(h.vin)}
+            <span>${escapeHtml(h.title)}</span>
+          </div>
+        `);
+      });
+
+      chips.querySelectorAll(".chip").forEach(c=>{
+        c.addEventListener("click", ()=>{
+          const v = c.getAttribute("data-v") || "";
+          vinEl.value = v;
+          vinEl.dispatchEvent(new Event("input"));
+          decode();
+        });
+      });
+    }
+    function clearHistory(){
+      history = [];
+      saveHistory();
+      renderHistory();
+      showToast("History cleared");
+    }
+
+    // initial render
+    renderHistory();
     setStatus("", "");
   </script>
 </body>
