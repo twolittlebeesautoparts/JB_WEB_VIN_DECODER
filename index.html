@@ -8,8 +8,9 @@
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0e1214">
 
-  <!-- Perf: preconnect -->
+  <!-- Perf -->
   <link rel="preconnect" href="https://vpic.nhtsa.dot.gov">
+  <link rel="dns-prefetch" href="https://vpic.nhtsa.dot.gov">
 
   <style>
     :root{
@@ -28,10 +29,13 @@
       --warn:#f59e0b;
 
       --border:rgba(255,255,255,.08);
+      --border2:rgba(255,255,255,.12);
       --shadow: 0 18px 50px rgba(0,0,0,.35);
 
       --radius:18px;
       --radius2:14px;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
     *{box-sizing:border-box}
@@ -50,7 +54,7 @@
     }
 
     .app{
-      max-width:620px;
+      max-width:760px;
       margin:0 auto;
       padding:16px;
     }
@@ -106,7 +110,20 @@
       margin-top:16px;
       border:1px solid var(--border);
       box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
     }
+
+    .card:before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: radial-gradient(800px 220px at 15% 0%, rgba(59,130,246,.13), transparent 55%),
+                  radial-gradient(800px 220px at 90% 10%, rgba(37,99,235,.08), transparent 55%);
+      pointer-events:none;
+      opacity:.9;
+    }
+    .card > *{ position:relative; }
 
     /* ================= INPUT / BUTTONS ================= */
     .stack{display:grid; gap:10px}
@@ -121,6 +138,7 @@
       text-transform:uppercase;
       font-size:14px;
       letter-spacing:.6px;
+      font-family: var(--mono);
     }
 
     input:focus{
@@ -131,7 +149,7 @@
 
     .btns{
       display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1.2fr 1fr 1fr;
       gap:10px;
     }
 
@@ -145,7 +163,7 @@
       cursor:pointer;
       background:#0b1116;
       color:var(--text);
-      transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+      transition: transform .12s ease, filter .12s ease, opacity .12s ease, box-shadow .12s ease;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
     }
@@ -157,6 +175,7 @@
       background:linear-gradient(180deg,var(--accent),var(--accent2));
       color:#fff;
       border:none;
+      box-shadow: 0 10px 24px rgba(59,130,246,.18);
     }
 
     .secondary{
@@ -186,9 +205,8 @@
       font-weight:900;
     }
     .toggle input{width:auto; margin:0}
-    .miniBtns{
-      display:flex; gap:10px; flex-wrap:wrap;
-    }
+
+    .miniBtns{display:flex; gap:10px; flex-wrap:wrap;}
     .miniBtn{
       padding:8px 10px;
       border-radius:999px;
@@ -196,7 +214,7 @@
       font-weight:900;
     }
 
-    /* ================= STATUS ================= */
+    /* ================= STATUS + METRICS ================= */
     .status{
       margin-top:10px;
       font-size:12px;
@@ -228,6 +246,70 @@
       line-height:1.35;
     }
 
+    .metrics{
+      margin-top:12px;
+      display:none;
+      gap:10px;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+    }
+    .metric{
+      border:1px solid var(--border);
+      background:#0b1116;
+      border-radius:16px;
+      padding:12px;
+    }
+    .metric .label{
+      color:var(--muted);
+      font-size:11px;
+      font-weight:900;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .metric .value{
+      margin-top:8px;
+      font-size:14px;
+      font-weight:950;
+      line-height:1.2;
+    }
+    .meter{
+      margin-top:10px;
+      height:10px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:999px;
+      overflow:hidden;
+      position:relative;
+    }
+    .meter > span{
+      display:block;
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, rgba(59,130,246,1), rgba(34,197,94,1));
+      border-radius:999px;
+      transition:width .2s ease;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#0b1116;
+      font-size:11px;
+      font-weight:950;
+      color:var(--text);
+      white-space:nowrap;
+    }
+    .badge small{color:var(--muted); font-weight:900}
+    .badges{
+      display:none;
+      margin-top:12px;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
     /* ================= VEHICLE SUMMARY ================= */
     .vehicle{
       margin-top:14px;
@@ -249,6 +331,76 @@
       font-size:12px;
       font-weight:800;
       color:#aeb8c2;
+    }
+
+    /* ================= ACTION BAR ================= */
+    .actions{
+      margin-top:12px;
+      display:none;
+      gap:10px;
+      grid-template-columns: 1fr 1fr;
+    }
+    .actions button{
+      padding:10px 12px;
+      border-radius:14px;
+      font-size:12px;
+    }
+
+    /* ================= FILTERS ================= */
+    .filters{
+      margin-top:14px;
+      display:none;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      border:1px solid var(--border);
+      background:#0b1116;
+      border-radius:16px;
+      padding:10px;
+    }
+    .filters .left{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .searchWrap{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border:1px solid rgba(255,255,255,.10);
+      background:#0b1116;
+      padding:8px 10px;
+      border-radius:999px;
+      min-width:220px;
+      flex: 1 1 220px;
+    }
+    .searchWrap svg{opacity:.7; flex:0 0 auto}
+    #search{
+      border:0;
+      outline:0;
+      background:transparent;
+      color:var(--text);
+      font-weight:900;
+      font-size:12px;
+      padding:0;
+      text-transform:none;
+      letter-spacing:.2px;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      width:100%;
+    }
+    .select{
+      appearance:none;
+      -webkit-appearance:none;
+      border:1px solid rgba(255,255,255,.10);
+      background:#0b1116;
+      color:var(--text);
+      font-weight:950;
+      font-size:12px;
+      padding:9px 12px;
+      border-radius:999px;
+      cursor:pointer;
     }
 
     /* ================= TABS ================= */
@@ -316,6 +468,22 @@
 
     .row.copyable{cursor:pointer}
     .row.copyable:active{filter:brightness(1.08)}
+
+    .row.hidden{display:none}
+
+    .row .tag{
+      display:inline-flex;
+      align-items:center;
+      font-size:10px;
+      font-weight:950;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--muted);
+      background:rgba(255,255,255,.03);
+      margin-top:6px;
+      width:fit-content;
+    }
 
     .toast{
       position:fixed;
@@ -428,10 +596,10 @@
       color:#7c8793;
     }
 
-    /* ================= PRINT (LOGO + RESULTS ONLY) ================= */
+    /* ================= PRINT ================= */
     @media print{
       body{background:#fff !important; color:#000 !important}
-      .header, .btns, .tabs, .status, .hint, .disclaimer, .footer, #workflow, .toolbar, .history{display:none !important}
+      .header, .btns, .tabs, .status, .hint, .disclaimer, .footer, #workflow, .toolbar, .history, .filters, .metrics, .badges, .actions{display:none !important}
       .card{box-shadow:none !important; border:0 !important; background:#fff !important}
       .app{max-width:900px}
       .printHeader{
@@ -457,6 +625,11 @@
 
     @media (prefers-reduced-motion: reduce){
       *{transition:none !important}
+    }
+
+    @media (max-width:420px){
+      .btns{grid-template-columns: 1fr 1fr 1fr;}
+      .metrics{grid-template-columns: 1fr;}
     }
   </style>
 </head>
@@ -490,8 +663,8 @@
 
         <div class="btns">
           <button class="primary" id="decodeBtn" onclick="decode()">Decode</button>
-          <button class="secondary" onclick="resetAll()">Reset</button>
-          <button class="secondary" onclick="printReport()">Print</button>
+          <button class="secondary" type="button" onclick="resetAll()">Reset</button>
+          <button class="secondary" type="button" onclick="printReport()">Print</button>
         </div>
 
         <div class="toolbar">
@@ -508,11 +681,70 @@
       </div>
 
       <div id="status" class="status"><span class="dot"></span><span id="statusText"></span></div>
+
+      <!-- NEW: metrics + badges -->
+      <div class="metrics" id="metrics">
+        <div class="metric">
+          <div class="label">
+            <span>Decode confidence</span>
+            <span id="confPct">—</span>
+          </div>
+          <div class="meter"><span id="confBar"></span></div>
+          <div class="value" id="confText">—</div>
+        </div>
+
+        <div class="metric">
+          <div class="label">
+            <span>Order readiness</span>
+            <span id="riskTag">—</span>
+          </div>
+          <div class="value" id="readyText">—</div>
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
+            <span class="badge"><small>Source:</small> <span id="srcTag">—</span></span>
+            <span class="badge"><small>Cache:</small> <span id="cacheTag">—</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="badges" id="badges"></div>
+
       <div class="hint" id="hint">
-        Tip: paste a VIN, it auto-cleans. Tap any row to copy. Print is logo + vehicle + decoded rows.
+        Tip: paste a VIN, it auto-cleans. Tap any row to copy. Search filters hide noise. Export = JSON/CSV.
       </div>
 
       <div id="vehicle" class="vehicle"></div>
+
+      <!-- NEW: quick actions -->
+      <div class="actions" id="actions">
+        <button class="secondary" type="button" onclick="exportJSON()">Export JSON</button>
+        <button class="secondary" type="button" onclick="exportCSV()">Export CSV</button>
+      </div>
+
+      <!-- NEW: filters -->
+      <div class="filters" id="filters">
+        <div class="left">
+          <div class="searchWrap" title="Filter decoded rows by keyword">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="2" opacity=".8"/>
+              <path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" opacity=".8"/>
+            </svg>
+            <input id="search" placeholder="Search decoded fields… (ex: ABS, engine, plant, airbag)" />
+          </div>
+
+          <select class="select" id="noise">
+            <option value="smart" selected>Hide low-value (smart)</option>
+            <option value="all">Show everything</option>
+            <option value="essentials">Essentials only</option>
+          </select>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+          <span class="badge" title="Tap rows to copy">
+            <small>Copy:</small> On
+          </span>
+          <span class="badge" id="countBadge"><small>Rows:</small> 0</span>
+        </div>
+      </div>
 
       <div class="tabs" role="tablist" aria-label="VIN Decoder Tabs">
         <button class="tab active" data-tab="core" role="tab" aria-selected="true">Core</button>
@@ -520,6 +752,7 @@
         <button class="tab" data-tab="drive" role="tab" aria-selected="false">Drive</button>
         <button class="tab" data-tab="body" role="tab" aria-selected="false">Body</button>
         <button class="tab" data-tab="safety" role="tab" aria-selected="false">Safety</button>
+        <button class="tab" data-tab="ids" role="tab" aria-selected="false">IDs</button>
         <button class="tab" id="advTabBtn" data-tab="advanced" role="tab" aria-selected="false" style="display:none">Advanced</button>
       </div>
 
@@ -528,6 +761,7 @@
       <div id="drive" class="results tab-panel" style="display:none"></div>
       <div id="body" class="results tab-panel" style="display:none"></div>
       <div id="safety" class="results tab-panel" style="display:none"></div>
+      <div id="ids" class="results tab-panel" style="display:none"></div>
       <div id="advanced" class="results tab-panel" style="display:none"></div>
 
       <div id="oem" class="oem" style="display:none"></div>
@@ -577,19 +811,38 @@
     const decodeBtn = document.getElementById("decodeBtn");
     const toast = document.getElementById("toast");
 
-    const panels = ["core","engine","drive","body","safety","advanced"];
+    // new UI
+    const metricsEl = document.getElementById("metrics");
+    const confPctEl = document.getElementById("confPct");
+    const confBarEl = document.getElementById("confBar");
+    const confTextEl = document.getElementById("confText");
+    const readyTextEl = document.getElementById("readyText");
+    const riskTagEl = document.getElementById("riskTag");
+    const srcTagEl = document.getElementById("srcTag");
+    const cacheTagEl = document.getElementById("cacheTag");
+    const badgesEl = document.getElementById("badges");
+    const actionsEl = document.getElementById("actions");
+    const filtersEl = document.getElementById("filters");
+    const searchEl = document.getElementById("search");
+    const noiseEl = document.getElementById("noise");
+    const countBadgeEl = document.getElementById("countBadge");
+
+    const panels = ["core","engine","drive","body","safety","ids","advanced"];
     let activePanel = "core";
     let busy = false;
 
-    // cache last decode so print works
-    let last = { vin:"", d:null, ts:0, source:"" };
+    // cache last decode so print/export works
+    let last = { vin:"", d:null, ts:0, source:"", fromCache:false };
 
     // history
-    const HISTORY_KEY = "jb_vin_history_v2";
+    const HISTORY_KEY = "jb_vin_history_v3";
     let history = loadHistory();
 
     // advanced fields toggle
     let advancedOn = false;
+
+    // internal rows store for filtering + exports
+    let rowsStore = []; // {panel,k,v,importance,tags[]}
 
     /* =======================
        BASIC HELPERS
@@ -616,6 +869,8 @@
         "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
       }[m]));
     }
+
+    function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
 
     /* =======================
        CONFIG DETECTORS
@@ -648,11 +903,17 @@
       return Math.min(100, s);
     }
 
+    function readinessKind(d){
+      // 0 high risk, 1 verify, 2 ready
+      if((has(d.EngineModel) || has(d.DisplacementL)) && has(d.TransmissionStyle) && has(d.DriveType)) return 2;
+      if((has(d.Make) && has(d.Model) && has(d.ModelYear))) return 1;
+      return 0;
+    }
+
     function orderReadiness(d){
-      if((has(d.EngineModel) || has(d.DisplacementL)) && has(d.TransmissionStyle) && has(d.DriveType))
-        return "✓ Ready for most mechanical parts";
-      if((has(d.Make) && has(d.Model) && has(d.ModelYear)))
-        return "⚠ Good base — verify engine/trans before ordering";
+      const k = readinessKind(d);
+      if(k===2) return "✓ Ready for most mechanical parts";
+      if(k===1) return "⚠ Good base — verify engine/trans before ordering";
       return "⛔ Decode incomplete — verify configuration";
     }
 
@@ -669,6 +930,21 @@
       return "✓ VIN configuration consistent";
     }
 
+    function buildBadges(d){
+      const b = [];
+      if(has(d.Doors)) b.push({t:`${d.Doors} doors`, s:"Body"});
+      if(has(d.BodyClass)) b.push({t:d.BodyClass, s:"Body"});
+      if(has(d.DriveType)) b.push({t:d.DriveType, s:"Drive"});
+      if(has(d.TransmissionStyle)) b.push({t:d.TransmissionStyle, s:"Drive"});
+      if(has(d.EngineCylinders)) b.push({t:`${d.EngineCylinders} cyl`, s:"Engine"});
+      if(has(d.DisplacementL)) b.push({t:`${d.DisplacementL}L`, s:"Engine"});
+      if(has(d.FuelTypePrimary)) b.push({t:d.FuelTypePrimary, s:"Engine"});
+      if(isElectric(d)) b.push({t:"Electrified", s:"Engine"});
+      if(isDiesel(d)) b.push({t:"Diesel", s:"Engine"});
+      if(isAWD(d)) b.push({t:"AWD", s:"Drive"});
+      return b.slice(0,10);
+    }
+
     /* =======================
        UI HELPERS
     ======================= */
@@ -676,22 +952,38 @@
 
     function clearPanels(){
       document.querySelectorAll(".tab-panel").forEach(p => p.innerHTML = "");
+      rowsStore = [];
+      updateRowCount();
     }
 
-    function addRow(panelId, k, v){
+    function updateRowCount(){
+      const visible = document.querySelectorAll(`#${activePanel} .row:not(.hidden)`).length;
+      countBadgeEl.innerHTML = `<small>Rows:</small> ${visible}`;
+    }
+
+    function addRow(panelId, k, v, opts={}){
       if(!has(v)) return;
       const panel = getPanel(panelId);
       if(!panel) return;
 
       const safeK = escapeHtml(k);
       const safeV = escapeHtml(String(v));
+      const tag = opts.tag ? `<div class="tag">${escapeHtml(opts.tag)}</div>` : "";
 
       panel.insertAdjacentHTML("beforeend", `
-        <div class="row copyable" data-copy="${safeV}">
-          <div class="k">${safeK}</div>
+        <div class="row copyable" data-copy="${safeV}" data-k="${safeK}" data-v="${safeV}" data-imp="${opts.importance||"n"}">
+          <div class="k">${safeK}${tag}</div>
           <div class="v">${safeV}</div>
         </div>
       `);
+
+      rowsStore.push({
+        panel: panelId,
+        k: String(k),
+        v: String(v),
+        importance: opts.importance || "n",
+        tags: opts.tags || []
+      });
     }
 
     function buildVehicleSummary(d, v){
@@ -731,8 +1023,10 @@
       const verify = [];
       const unsafe = [];
 
-      safe.push("Cabin air filter", "Wiper blades");
+      // always-safe
+      safe.push("Cabin air filter", "Wiper blades", "Key fob battery (verify style)");
 
+      // mechanical logic
       if(isElectric(d)){
         verify.push("High-voltage components (catalog required)");
         unsafe.push("Inverter/drive unit (option-heavy)");
@@ -741,10 +1035,14 @@
         else verify.push("Oil filter (confirm engine)");
         if(isManual(d)) verify.push("Clutch kit (confirm trans code)");
         if(isCVT(d)) unsafe.push("CVT valve body / TCM (variant-heavy)");
+        if(has(d.TransmissionStyle)) safe.push("Transmission service kit (fluid/filter) — verify pan style");
       }
 
       if(isAWD(d)) verify.push("Transfer case service parts");
       if(isDiesel(d)) verify.push("Fuel filter (diesel-specific)");
+
+      // safety-ish
+      verify.push("Brake pads/rotors (confirm rotor size options)");
 
       const renderList = (el, items) => {
         if(!items.length){
@@ -766,13 +1064,49 @@
       wf.style.display = "block";
     }
 
+    function showTopUI(show){
+      metricsEl.style.display = show ? "grid" : "none";
+      badgesEl.style.display = show ? "flex" : "none";
+      actionsEl.style.display = show ? "grid" : "none";
+      filtersEl.style.display = show ? "flex" : "none";
+    }
+
+    function setMetrics(d){
+      const c = confidenceScore(d);
+      confPctEl.textContent = `${c}%`;
+      confBarEl.style.width = `${clamp(c,0,100)}%`;
+
+      const kind = readinessKind(d);
+      const risk = (kind===2) ? "Ready" : (kind===1) ? "Verify" : "High risk";
+      riskTagEl.textContent = risk;
+
+      confTextEl.textContent =
+        (c >= 80) ? "High confidence decode" :
+        (c >= 55) ? "Decent — verify key options" :
+        "Low — treat as a lead only";
+
+      readyTextEl.textContent = orderReadiness(d);
+
+      srcTagEl.textContent = last.source || "—";
+      cacheTagEl.textContent = last.fromCache ? "hit" : "miss";
+    }
+
+    function setBadges(d){
+      const list = buildBadges(d);
+      badgesEl.innerHTML = "";
+      list.forEach(x=>{
+        badgesEl.insertAdjacentHTML("beforeend", `<span class="badge"><small>${escapeHtml(x.s)}:</small> ${escapeHtml(x.t)}</span>`);
+      });
+    }
+
     /* =======================
-       TABS (better than onclick strings)
+       TABS
     ======================= */
     document.querySelectorAll(".tab").forEach(btn=>{
       btn.addEventListener("click", ()=>{
         const id = btn.getAttribute("data-tab");
         showTab(id);
+        applyFilters();
       });
     });
 
@@ -792,6 +1126,7 @@
         btn.classList.add("active");
         btn.setAttribute("aria-selected","true");
       }
+      updateRowCount();
     }
 
     /* =======================
@@ -824,11 +1159,13 @@
       if(!valid(v)){
         setStatus("Invalid VIN (17 chars, no I/O/Q).", "bad");
         vehicleEl.style.display = "none";
+        showTopUI(false);
         return;
       }
 
       const now = Date.now();
       if(last.vin === v && last.d && (now - last.ts) < 60_000){
+        last.fromCache = true;
         renderAll(last.d, v);
         setStatus(`Loaded from cache (last 60s). Source: ${last.source}.`, "ok");
         return;
@@ -844,12 +1181,13 @@
       document.getElementById("oem").style.display = "none";
       document.getElementById("workflow").style.display = "none";
       vehicleEl.style.display = "none";
+      showTopUI(false);
 
       try{
         const { json, source } = await fetchDecode(v);
         const d = json?.Results?.[0] || {};
 
-        last = { vin:v, d, ts:Date.now(), source };
+        last = { vin:v, d, ts:Date.now(), source, fromCache:false };
 
         // history
         pushHistory(v, d);
@@ -869,65 +1207,86 @@
       clearPanels();
       buildVehicleSummary(d, v);
 
-      // CORE
-      addRow("core", "VIN", v);
-      addRow("core", "Model Year", d.ModelYear);
-      addRow("core", "Make", d.Make);
-      addRow("core", "Model", d.Model);
-      addRow("core", "Trim", d.Trim);
-      addRow("core", "Series", d.Series);
-      addRow("core", "Vehicle Type", d.VehicleType);
-      addRow("core", "Body Class", d.BodyClass);
-      addRow("core", "Plant Country", d.PlantCountry);
-      addRow("core", "Plant City", d.PlantCity);
-      addRow("core", "Manufacturer", d.Manufacturer);
-      addRow("core", "Decode Confidence", `${confidenceScore(d)}%`);
-      addRow("core", "VIN Validation", sanityCheck(d));
-      addRow("core", "Order Readiness", orderReadiness(d));
-      addRow("core", "Platform", platformGroup(d));
+      // top UI
+      showTopUI(true);
+      setMetrics(d);
+      setBadges(d);
+
+      // CORE (high signal)
+      addRow("core", "VIN", v, {importance:"h", tag:"identifier"});
+      addRow("core", "Model Year", d.ModelYear, {importance:"h"});
+      addRow("core", "Make", d.Make, {importance:"h"});
+      addRow("core", "Model", d.Model, {importance:"h"});
+      addRow("core", "Trim", d.Trim, {importance:"m"});
+      addRow("core", "Series", d.Series, {importance:"m"});
+      addRow("core", "Vehicle Type", d.VehicleType, {importance:"m"});
+      addRow("core", "Body Class", d.BodyClass, {importance:"m"});
+      addRow("core", "Doors", d.Doors, {importance:"m"});
+      addRow("core", "Manufacturer", d.Manufacturer, {importance:"m"});
+      addRow("core", "Plant Country", d.PlantCountry, {importance:"l"});
+      addRow("core", "Plant City", d.PlantCity, {importance:"l"});
+      addRow("core", "Plant Company", d.PlantCompanyName, {importance:"l"});
+      addRow("core", "Decode Confidence", `${confidenceScore(d)}%`, {importance:"h", tag:"score"});
+      addRow("core", "VIN Validation", sanityCheck(d), {importance:"h", tag:"check"});
+      addRow("core", "Order Readiness", orderReadiness(d), {importance:"h", tag:"counter"});
+      addRow("core", "Platform", platformGroup(d), {importance:"l"});
 
       // ENGINE
-      addRow("engine", "Engine Code", d.EngineModel);
-      addRow("engine", "Displacement", d.DisplacementL ? `${d.DisplacementL} L` : "");
-      addRow("engine", "Cylinders", d.EngineCylinders);
-      addRow("engine", "Fuel Type", d.FuelTypePrimary);
-      addRow("engine", "Electrification", d.ElectrificationLevel);
-      addRow("engine", "Valve Train", d.ValveTrainDesign);
-      addRow("engine", "Turbo", d.Turbo);
-      addRow("engine", "Engine Config", d.EngineConfiguration);
+      addRow("engine", "Engine Code", d.EngineModel, {importance:"h"});
+      addRow("engine", "Displacement", d.DisplacementL ? `${d.DisplacementL} L` : "", {importance:"h"});
+      addRow("engine", "Cylinders", d.EngineCylinders, {importance:"h"});
+      addRow("engine", "Fuel Type", d.FuelTypePrimary, {importance:"h"});
+      addRow("engine", "Electrification", d.ElectrificationLevel, {importance:"m"});
+      addRow("engine", "Engine Configuration", d.EngineConfiguration, {importance:"m"});
+      addRow("engine", "Valve Train", d.ValveTrainDesign, {importance:"l"});
+      addRow("engine", "Turbo", d.Turbo, {importance:"m"});
+      addRow("engine", "Engine Power (kW)", d.EnginePowerKW, {importance:"l"});
+      addRow("engine", "Battery Type", d.BatteryType, {importance:"l"});
+      addRow("engine", "Battery Voltage", d.BatteryVoltage, {importance:"l"});
 
       // DRIVE
-      addRow("drive", "Transmission", d.TransmissionStyle);
-      addRow("drive", "Transmission Speeds", d.TransmissionSpeeds);
-      addRow("drive", "Drive Type", d.DriveType);
-      addRow("drive", "Brake System", d.BrakeSystemType);
+      addRow("drive", "Transmission", d.TransmissionStyle, {importance:"h"});
+      addRow("drive", "Transmission Speeds", d.TransmissionSpeeds, {importance:"m"});
+      addRow("drive", "Drive Type", d.DriveType, {importance:"h"});
+      addRow("drive", "Brake System", d.BrakeSystemType, {importance:"m"});
+      addRow("drive", "Axles", d.Axles, {importance:"l"});
 
       // BODY
-      addRow("body", "Doors", d.Doors);
-      addRow("body", "Body Class", d.BodyClass);
-      addRow("body", "GVWR", d.GVWR);
-      addRow("body", "Wheelbase", d.WheelBaseShort);
-      addRow("body", "Track Width", d.TrackWidth);
+      addRow("body", "Body Class", d.BodyClass, {importance:"m"});
+      addRow("body", "GVWR", d.GVWR, {importance:"m"});
+      addRow("body", "Wheelbase", d.WheelBaseShort, {importance:"m"});
+      addRow("body", "Track Width", d.TrackWidth, {importance:"l"});
+      addRow("body", "Bed Length (in)", d.BedLengthIN, {importance:"l"});
+      addRow("body", "Cab Type", d.CabType, {importance:"l"});
 
       // SAFETY
-      addRow("safety", "ABS", d.ABS);
-      addRow("safety", "ESC", d.ESC);
-      addRow("safety", "Traction Control", d.TractionControl);
-      addRow("safety", "Air Bags (Front)", d.AirBagLocFront);
-      addRow("safety", "Air Bags (Side)", d.AirBagLocSide);
+      addRow("safety", "ABS", d.ABS, {importance:"m"});
+      addRow("safety", "ESC", d.ESC, {importance:"m"});
+      addRow("safety", "Traction Control", d.TractionControl, {importance:"m"});
+      addRow("safety", "Air Bags (Front)", d.AirBagLocFront, {importance:"m"});
+      addRow("safety", "Air Bags (Side)", d.AirBagLocSide, {importance:"m"});
+      addRow("safety", "Air Bags (Curtain)", d.AirBagLocCurtain, {importance:"m"});
+      addRow("safety", "TPMS", d.TPMS, {importance:"l"});
+
+      // IDs / codes (super useful for salvage/parts)
+      addRow("ids", "WMI (World Manufacturer)", d.WMI, {importance:"h", tag:"code"});
+      addRow("ids", "VDS", d.VDS, {importance:"h", tag:"code"});
+      addRow("ids", "VIS", d.VIS, {importance:"h", tag:"code"});
+      addRow("ids", "NCSA Make", d.NCSAMake, {importance:"l"});
+      addRow("ids", "NCSA Model", d.NCSAModel, {importance:"l"});
+      addRow("ids", "NCSA Body Type", d.NCSABodyType, {importance:"l"});
+      addRow("ids", "Destination Market", d.DestinationMarket, {importance:"l"});
 
       // ADVANCED (optional)
       if(advancedOn){
         const adv = getPanel("advanced");
         adv.innerHTML = "";
-        // dump useful high-signal fields without spamming "Not Applicable"
         const keys = Object.keys(d || {}).sort((a,b)=>a.localeCompare(b));
         keys.forEach(k=>{
           const val = d[k];
           if(!has(val)) return;
-          // avoid duplicating core basics
           if(["Make","Model","ModelYear","Trim","Series","VehicleType","BodyClass","EngineModel","DisplacementL","EngineCylinders","FuelTypePrimary","TransmissionStyle","DriveType"].includes(k)) return;
-          addRow("advanced", k, val);
+          addRow("advanced", k, val, {importance:"l"});
         });
       }
 
@@ -945,7 +1304,95 @@
       oem.style.display = drivetrain.length ? "block" : "none";
 
       showWorkflow(d);
+
+      // apply filters defaults
       showTab("core");
+      applyFilters();
+    }
+
+    /* =======================
+       FILTERS (search + noise)
+    ======================= */
+    function applyFilters(){
+      const q = lower(searchEl.value || "").trim();
+      const mode = noiseEl.value;
+
+      const panel = getPanel(activePanel);
+      if(!panel) return;
+
+      const rows = panel.querySelectorAll(".row");
+      rows.forEach(r=>{
+        const k = lower(r.getAttribute("data-k") || "");
+        const v = lower(r.getAttribute("data-v") || "");
+        const imp = r.getAttribute("data-imp") || "n";
+
+        // search
+        const passSearch = !q || k.includes(q) || v.includes(q);
+
+        // noise
+        let passNoise = true;
+        if(mode === "essentials"){
+          passNoise = (imp === "h");
+        }else if(mode === "smart"){
+          passNoise = (imp === "h" || imp === "m");
+        } // all => true
+
+        r.classList.toggle("hidden", !(passSearch && passNoise));
+      });
+
+      updateRowCount();
+    }
+
+    searchEl.addEventListener("input", ()=> applyFilters());
+    noiseEl.addEventListener("change", ()=> applyFilters());
+
+    /* =======================
+       EXPORTS
+    ======================= */
+    function downloadFile(name, content, mime){
+      const blob = new Blob([content], {type:mime});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=> URL.revokeObjectURL(a.href), 1000);
+    }
+
+    function exportJSON(){
+      if(!last.d){ setStatus("Decode a VIN first.", "warn"); return; }
+      const payload = {
+        vin: last.vin,
+        source: last.source,
+        decoded: last.d,
+        exportedAt: new Date().toISOString()
+      };
+      downloadFile(`vin_${last.vin}.json`, JSON.stringify(payload, null, 2), "application/json");
+      showToast("JSON exported");
+    }
+
+    function exportCSV(){
+      if(!last.d){ setStatus("Decode a VIN first.", "warn"); return; }
+
+      // export current rowsStore (all panels) as k/v pairs
+      const lines = [];
+      lines.push(["Panel","Key","Value"].join(","));
+      rowsStore.forEach(r=>{
+        const p = csvEscape(r.panel);
+        const k = csvEscape(r.k);
+        const v = csvEscape(r.v);
+        lines.push([p,k,v].join(","));
+      });
+
+      downloadFile(`vin_${last.vin}.csv`, lines.join("\n"), "text/csv");
+      showToast("CSV exported");
+    }
+
+    function csvEscape(s){
+      const str = String(s ?? "");
+      if(/[",\n]/.test(str)) return `"${str.replace(/"/g,'""')}"`;
+      return str;
     }
 
     /* =======================
@@ -1006,11 +1453,14 @@
       document.getElementById("oem").innerHTML = "";
       document.getElementById("oem").style.display = "none";
       document.getElementById("workflow").style.display = "none";
+      showTopUI(false);
       setStatus("", "");
       showTab("core");
       busy = false;
       decodeBtn.disabled = false;
-      last = { vin:"", d:null, ts:0, source:"" };
+      last = { vin:"", d:null, ts:0, source:"", fromCache:false };
+      searchEl.value = "";
+      noiseEl.value = "smart";
     }
 
     function printReport(){
@@ -1025,10 +1475,10 @@
        SAMPLE VINs (for testing UI)
     ======================= */
     const samples = [
-      "1HGCM82633A004352", // Honda (sample)
-      "1FTFW1ET1EFA00001", // Ford (sample)
-      "2T1BURHE5JC000001", // Toyota (sample)
-      "1N4AL3AP9JC000001"  // Nissan (sample)
+      "1HGCM82633A004352",
+      "1FTFW1ET1EFA00001",
+      "2T1BURHE5JC000001",
+      "1N4AL3AP9JC000001"
     ];
     let sampleIdx = 0;
     function fillSample(){
@@ -1046,7 +1496,6 @@
       const btn = document.getElementById("advTabBtn");
       btn.style.display = advancedOn ? "inline-flex" : "none";
       showToast(advancedOn ? "Advanced ON" : "Advanced OFF");
-      // re-render if we have data
       if(last.d) renderAll(last.d, last.vin);
       if(!advancedOn && activePanel === "advanced") showTab("core");
     }
@@ -1063,16 +1512,16 @@
         return [];
       }
     }
-    function saveHistory(){
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-    }
+    function saveHistory(){ localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); }
+
     function pushHistory(vin, d){
       const title = `${d.ModelYear||""} ${d.Make||""} ${d.Model||""}`.trim();
       history = history.filter(x => x.vin !== vin);
       history.unshift({ vin, title: title || "Vehicle", t: Date.now() });
-      history = history.slice(0, 8);
+      history = history.slice(0, 10);
       saveHistory();
     }
+
     function renderHistory(){
       const wrap = document.getElementById("history");
       const chips = document.getElementById("chips");
@@ -1102,6 +1551,7 @@
         });
       });
     }
+
     function clearHistory(){
       history = [];
       saveHistory();
@@ -1112,6 +1562,7 @@
     // initial render
     renderHistory();
     setStatus("", "");
+    showTopUI(false);
   </script>
 </body>
 </html>
